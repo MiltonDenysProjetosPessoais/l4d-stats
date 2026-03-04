@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function App() {
   const [players, setPlayers] = useState([
@@ -18,17 +18,43 @@ export default function App() {
 
   const player = players[selectedIndex];
 
-  const addVote = () => {
-    const updatedPlayers = [...players];
-    updatedPlayers[selectedIndex].votos.push(vote);
+  // 🔥 carregar votos do servidor
+  const loadVotes = async () => {
+    const res = await fetch("/.netlify/functions/vote");
+    const data = await res.json();
 
-    setPlayers(updatedPlayers);
+    setPlayers((currentPlayers) =>
+      currentPlayers.map((p) => ({
+        ...p,
+        votos: data.filter((v) => v.player === p.nome),
+      }))
+    );
+  };
 
-    alert("Voto registrado!");
+  // roda ao abrir o site
+  useEffect(() => {
+    loadVotes();
+  }, []);
+
+  // enviar voto
+  const addVote = async () => {
+    await fetch("/.netlify/functions/vote", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        player: player.nome,
+        ...vote,
+      }),
+    });
+
+    await loadVotes(); // 🔥 atualiza médias automaticamente
+    alert("Voto enviado!");
   };
 
   const calculateAverage = (stat) => {
-    if (player.votos.length === 0) return 0;
+    if (!player || player.votos.length === 0) return 0;
 
     const total = player.votos.reduce(
       (sum, v) => sum + v[stat],
@@ -46,6 +72,8 @@ export default function App() {
       calculateAverage("infectado") +
       calculateAverage("nocao")
     ) / 5;
+
+  if (!player) return <div>Loading...</div>;
 
   return (
     <div style={{ padding: 20, fontFamily: "Arial" }}>

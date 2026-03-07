@@ -33,12 +33,10 @@ export default function App() {
 }
 
 function Dashboard({ user, onLogout }) {
-  const [players, setPlayers] = useState([
-    { nome: "Nick", votos: [] },
-    { nome: "Ellis", votos: [] },
-  ]);
-
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [players, setPlayers] = useState([]);
+  const [votes, setVotes] = useState([]);
+  const [selectedEmail, setSelectedEmail] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [vote, setVote] = useState({
     mira: 3,
@@ -48,79 +46,114 @@ function Dashboard({ user, onLogout }) {
     nocao: 3,
   });
 
-  const player = players[selectedIndex];
+  // registrar jogador no login e carregar dados
+  useEffect(() => {
+    const init = async () => {
+      // registrar o usuario como jogador
+      await fetch("/.netlify/functions/players", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          name: user.user_metadata?.full_name || user.email.split("@")[0],
+        }),
+      });
 
-  // carregar votos do servidor
-  const loadVotes = async () => {
-    const res = await fetch("/.netlify/functions/vote");
-    const data = await res.json();
+      // carregar jogadores e votos
+      const [playersRes, votesRes] = await Promise.all([
+        fetch("/.netlify/functions/players"),
+        fetch("/.netlify/functions/vote"),
+      ]);
 
-    setPlayers((currentPlayers) =>
-      currentPlayers.map((p) => ({
-        ...p,
-        votos: data.filter((v) => v.player === p.nome),
-      }))
-    );
+      const playersData = await playersRes.json();
+      const votesData = await votesRes.json();
+
+      setPlayers(playersData);
+      setVotes(votesData);
+      setLoading(false);
+    };
+    init();
+  }, [user.email, user.user_metadata?.full_name]);
+
+  const loadData = async () => {
+    const [playersRes, votesRes] = await Promise.all([
+      fetch("/.netlify/functions/players"),
+      fetch("/.netlify/functions/vote"),
+    ]);
+    const playersData = await playersRes.json();
+    const votesData = await votesRes.json();
+    setPlayers(playersData);
+    setVotes(votesData);
   };
 
-  // roda ao abrir o site
-  useEffect(() => {
-    const fetchVotes = async () => {
-      const res = await fetch("/.netlify/functions/vote");
-      const data = await res.json();
+  // outros jogadores (nao mostra voce mesmo)
+  const otherPlayers = players.filter((p) => p.email !== user.email);
 
-      setPlayers((currentPlayers) =>
-        currentPlayers.map((p) => ({
-          ...p,
-          votos: data.filter((v) => v.player === p.nome),
-        }))
-      );
-    };
-    fetchVotes();
-  }, []);
+  const selectedPlayer = otherPlayers.find((p) => p.email === selectedEmail);
 
-  // enviar voto
+  // votos recebidos pelo jogador selecionado
+  const playerVotes = selectedPlayer
+    ? votes.filter((v) => v.player === selectedPlayer.email)
+    : [];
+
+  // verificar se ja votou neste jogador
+  const alreadyVoted = selectedPlayer
+    ? votes.some(
+        (v) => v.voter === user.email && v.player === selectedPlayer.email
+      )
+    : false;
+
+  // verificar em quem ja votou
+  const votedEmails = new Set(
+    votes.filter((v) => v.voter === user.email).map((v) => v.player)
+  );
+
+  const calculateAverage = (stat) => {
+    if (playerVotes.length === 0) return 0;
+    const total = playerVotes.reduce((sum, v) => sum + v[stat], 0);
+    return total / playerVotes.length;
+  };
+
+  const overall =
+    (calculateAverage("mira") +
+      calculateAverage("cover") +
+      calculateAverage("comunicacao") +
+      calculateAverage("infectado") +
+      calculateAverage("nocao")) / 5;
+
   const addVote = async () => {
-    await fetch("/.netlify/functions/vote", {
+    const res = await fetch("/.netlify/functions/vote", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        player: player.nome,
+        voter: user.email,
+        player: selectedPlayer.email,
         ...vote,
       }),
     });
 
-    await loadVotes(); // 🔥 atualiza médias automaticamente
+    const data = await res.json();
+
+    if (res.status === 409) {
+      alert(data.error);
+      return;
+    }
+
+    await loadData();
     alert("Voto enviado!");
   };
 
-  const calculateAverage = (stat) => {
-    if (!player || player.votos.length === 0) return 0;
-
-    const total = player.votos.reduce(
-      (sum, v) => sum + v[stat],
-      0
-    );
-
-    return total / player.votos.length;
-  };
-
-  const overall =
-    (
-      calculateAverage("mira") +
-      calculateAverage("cover") +
-      calculateAverage("comunicacao") +
-      calculateAverage("infectado") +
-      calculateAverage("nocao")
-    ) / 5;
-
-  if (!player) return <div>Loading...</div>;
+  if (loading) return <div style={{ padding: 20 }}>Carregando...</div>;
 
   return (
     <div style={{ padding: 20, fontFamily: "Arial" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <h1>L4D Stats Portal</h1>
         <div>
           <span style={{ marginRight: 10 }}>{user.email}</span>
@@ -129,43 +162,87 @@ function Dashboard({ user, onLogout }) {
       </div>
 
       <h3>Jogadores</h3>
-      {players.map((p, index) => (
-        <button key={index} onClick={() => setSelectedIndex(index)}>
-          {p.nome}
+      {otherPlayers.length === 0 && (
+        <p>Nenhum outro jogador cadastrado ainda.</p>
+      )}
+      {otherPlayers.map((p) => (
+        <button
+          key={p.email}
+          onClick={() => setSelectedEmail(p.email)}
+          style={{
+            marginRight: 5,
+            padding: "8px 16px",
+            backgroundColor:
+              selectedEmail === p.email ? "#007bff" : undefined,
+            color: selectedEmail === p.email ? "white" : undefined,
+            position: "relative",
+          }}
+        >
+          {p.name}
+          {votedEmails.has(p.email) && (
+            <span
+              style={{
+                marginLeft: 6,
+                fontSize: 12,
+                color: selectedEmail === p.email ? "#cce5ff" : "#28a745",
+              }}
+            >
+              (votado)
+            </span>
+          )}
         </button>
       ))}
 
-      <hr />
+      {selectedPlayer && (
+        <>
+          <hr />
 
-      <h2>Votar em: {player.nome}</h2>
+          <h2>Votar em: {selectedPlayer.name}</h2>
 
-      {Object.keys(vote).map((stat) => (
-        <div key={stat}>
-          <label>{stat}: </label>
-          <input
-            type="number"
-            min="0"
-            max="5"
-            value={vote[stat]}
-            onChange={(e) =>
-              setVote({ ...vote, [stat]: Number(e.target.value) })
-            }
-          />
-        </div>
-      ))}
+          {alreadyVoted ? (
+            <p style={{ color: "#28a745", fontWeight: "bold" }}>
+              Voce ja votou neste jogador.
+            </p>
+          ) : (
+            <>
+              {Object.keys(vote).map((stat) => (
+                <div key={stat} style={{ marginBottom: 5 }}>
+                  <label>{stat}: </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="5"
+                    value={vote[stat]}
+                    onChange={(e) =>
+                      setVote({
+                        ...vote,
+                        [stat]: Number(e.target.value),
+                      })
+                    }
+                  />
+                </div>
+              ))}
+              <button onClick={addVote} style={{ marginTop: 10 }}>
+                Enviar voto
+              </button>
+            </>
+          )}
 
-      <button onClick={addVote}>Enviar voto</button>
+          <hr />
 
-      <hr />
+          <h3>Medias de {selectedPlayer.name}</h3>
+          <p>Mira: {calculateAverage("mira").toFixed(2)}</p>
+          <p>Cover: {calculateAverage("cover").toFixed(2)}</p>
+          <p>Comunicacao: {calculateAverage("comunicacao").toFixed(2)}</p>
+          <p>Infectado: {calculateAverage("infectado").toFixed(2)}</p>
+          <p>Nocao: {calculateAverage("nocao").toFixed(2)}</p>
+          <p>
+            <em>({playerVotes.length} voto(s) recebido(s))</em>
+          </p>
 
-      <h3>Médias</h3>
-      <p>Mira: {calculateAverage("mira").toFixed(2)}</p>
-      <p>Cover: {calculateAverage("cover").toFixed(2)}</p>
-      <p>Comunicação: {calculateAverage("comunicacao").toFixed(2)}</p>
-      <p>Infectado: {calculateAverage("infectado").toFixed(2)}</p>
-      <p>Noção: {calculateAverage("nocao").toFixed(2)}</p>
-
-      <h2>Overall: {overall.toFixed(2)}</h2>
+          <h2>Overall: {overall.toFixed(2)}</h2>
+        </>
+      )}
     </div>
   );
 }

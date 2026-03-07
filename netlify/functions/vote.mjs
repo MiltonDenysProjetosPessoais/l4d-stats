@@ -139,18 +139,13 @@ const mockVotes = [
   },
 ];
 
-// Detecta modo desenvolvimento LOCAL apenas:
-// - Em produção: NETLIFY_BUILD_CONTEXT = "production" (nunca vai usar mocks)
-// - Em netlify dev: NETLIFY_LOCAL_EMULATION = "true"
-// - Em vite dev: DEV_MODE = "true"
-const isDev =
-  (process.env.DEV_MODE === "true" || process.env.NETLIFY_LOCAL_EMULATION === "true") &&
-  process.env.NETLIFY_BUILD_CONTEXT !== "production";
+// Modo desenvolvimento: APENAS com NETLIFY_LOCAL_EMULATION=true (netlify dev)
+const isDev = process.env.NETLIFY_LOCAL_EMULATION === "true";
 
 export default async (req, context) => {
-  // Em modo dev, usar dados de exemplo (APENAS em desenvolvimento local com netlify dev)
+  // Em modo dev LOCAL, usar dados de exemplo para GET
   if (isDev && req.method === "GET") {
-    console.log("[DEV MODE] Retornando dados de exemplo - Votos");
+    console.log("[DEV MODE LOCAL] Retornando dados de exemplo - Votos");
     const url = new URL(req.url);
     const filterPlayer = url.searchParams.get("player");
 

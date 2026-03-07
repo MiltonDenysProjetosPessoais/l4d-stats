@@ -14,7 +14,11 @@ export default function App() {
   }, []);
 
   const handleLogout = () => {
-    netlifyIdentity.logout();
+    try {
+      netlifyIdentity.logout();
+    } catch {
+      // dev mode: no real session to logout from
+    }
     setUser(null);
   };
 

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import netlifyIdentity from "netlify-identity-widget";
 import Login from "./Login.jsx";
+import "./App.css";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
@@ -190,214 +191,200 @@ function Dashboard({ user, onLogout }) {
     alert("Voto enviado!");
   };
 
-  if (loading) return <div style={{ padding: 20 }}>Carregando...</div>;
+  if (loading) {
+    return (
+      <div className="dashboard" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <h2>⏳ Carregando...</h2>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <div style={{ padding: 20, fontFamily: "Arial" }}>
-        <h1>L4D Stats Portal</h1>
-        <p style={{ color: "red" }}>Erro: {error}</p>
-        <button onClick={() => window.location.reload()}>
-          Tentar novamente
-        </button>
-        <br />
-        <button onClick={onLogout} style={{ marginTop: 10 }}>
-          Sair
-        </button>
+      <div className="dashboard">
+        <div className="header">
+          <h1>⚔️ L4D Stats Portal</h1>
+          <div className="header-right">
+            <button className="btn-danger" onClick={onLogout}>Sair</button>
+          </div>
+        </div>
+        <div className="vote-card" style={{ maxWidth: "600px", margin: "50px auto" }}>
+          <div className="status-message status-error">
+            ❌ Erro: {error}
+          </div>
+          <button className="btn-primary" onClick={() => window.location.reload()}>
+            Tentar novamente
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 20, fontFamily: "Arial" }}>
+    <div className="dashboard">
       {/* header */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
-        }}
-      >
-        <h1 style={{ margin: 0 }}>L4D Stats Portal</h1>
-        <div>
-          <span style={{ marginRight: 10 }}>{user.email}</span>
-          <button onClick={onLogout}>Sair</button>
+      <div className="header">
+        <h1>⚔️ L4D Stats Portal</h1>
+        <div className="header-right">
+          <div className="user-info">
+            <span>👤</span>
+            <span className="user-email">{user.email}</span>
+          </div>
+          <button className="btn-danger" onClick={onLogout}>Sair</button>
         </div>
       </div>
 
-      {/* layout principal: esquerda (votacao) + direita (ranking) */}
-      <div style={{ display: "flex", gap: 30, alignItems: "flex-start" }}>
+      {/* layout principal */}
+      <div className="main-content">
         {/* painel esquerdo - votacao */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3>Jogadores</h3>
-          {otherPlayers.length === 0 && (
-            <p>Nenhum outro jogador cadastrado ainda.</p>
-          )}
-          {otherPlayers.map((p) => (
-            <button
-              key={p.email}
-              onClick={() => setSelectedEmail(p.email)}
-              style={{
-                marginRight: 5,
-                marginBottom: 5,
-                padding: "8px 16px",
-                backgroundColor:
-                  selectedEmail === p.email ? "#007bff" : undefined,
-                color: selectedEmail === p.email ? "white" : undefined,
-              }}
-            >
-              {p.name}
-              {votedEmails.has(p.email) && (
-                <span
-                  style={{
-                    marginLeft: 6,
-                    fontSize: 12,
-                    color:
-                      selectedEmail === p.email ? "#cce5ff" : "#28a745",
-                  }}
+        <div className="voting-section">
+          {/* seleção de jogadores */}
+          <div className="vote-card">
+            <h3>👥 Selecione um Jogador</h3>
+            {otherPlayers.length === 0 && (
+              <p style={{ color: "#888", textAlign: "center" }}>Nenhum outro jogador cadastrado ainda.</p>
+            )}
+            <div className="players-grid">
+              {otherPlayers.map((p) => (
+                <button
+                  key={p.email}
+                  onClick={() => setSelectedEmail(p.email)}
+                  className={`player-btn ${selectedEmail === p.email ? "selected" : ""}`}
                 >
-                  (votado)
-                </span>
-              )}
-            </button>
-          ))}
+                  {p.name}
+                  {votedEmails.has(p.email) && <span className="player-badge">✓ votado</span>}
+                </button>
+              ))}
+            </div>
+          </div>
 
+          {/* formulário de votação */}
           {selectedPlayer && (
-            <>
-              <hr />
-
-              <h2>Votar em: {selectedPlayer.name}</h2>
+            <div className="vote-card">
+              <h2>🎯 Votar em: {selectedPlayer.name}</h2>
 
               {alreadyVoted ? (
-                <p style={{ color: "#28a745", fontWeight: "bold" }}>
-                  Voce ja votou neste jogador.
-                </p>
+                <div className="status-message status-success">
+                  ✓ Você já votou neste jogador
+                </div>
               ) : (
                 <>
-                  {Object.keys(vote).map((stat) => (
-                    <div key={stat} style={{ marginBottom: 5 }}>
-                      <label>{stat}: </label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="5"
-                        value={vote[stat]}
-                        onChange={(e) =>
-                          setVote({
-                            ...vote,
-                            [stat]: Number(e.target.value),
-                          })
-                        }
-                      />
-                    </div>
-                  ))}
-                  <button onClick={addVote} style={{ marginTop: 10 }}>
-                    Enviar voto
+                  <h3>Avalie os Atributos</h3>
+                  <div className="vote-inputs">
+                    {Object.keys(vote).map((stat) => (
+                      <div key={stat} className="vote-input-group">
+                        <label htmlFor={stat}>{stat}</label>
+                        <input
+                          id={stat}
+                          type="range"
+                          min="0"
+                          max="5"
+                          value={vote[stat]}
+                          onChange={(e) =>
+                            setVote({
+                              ...vote,
+                              [stat]: Number(e.target.value),
+                            })
+                          }
+                          style={{ cursor: "pointer" }}
+                        />
+                        <span style={{ minWidth: "30px", textAlign: "right", fontWeight: "bold" }}>
+                          {vote[stat]}/5
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                  <button className="btn-primary" onClick={addVote}>
+                    Enviar Voto
                   </button>
                 </>
               )}
+            </div>
+          )}
 
-              <hr />
+          {/* estatísticas do jogador */}
+          {selectedPlayer && (
+            <div className="vote-card">
+              <h3>📊 Estatísticas de {selectedPlayer.name}</h3>
+              <div className="stats-display">
+                {STATS.map((stat) => {
+                  const value = calculateAverage(stat);
+                  const percentage = (value / 5) * 100;
+                  return (
+                    <div key={stat} className="stat-row">
+                      <span className="stat-name">{stat}</span>
+                      <div className="stat-value">
+                        <div className="stat-bar">
+                          <div
+                            className="stat-bar-fill"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span style={{ minWidth: "35px", textAlign: "right" }}>
+                          {value.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
-              <h3>Medias de {selectedPlayer.name}</h3>
-              <p>Mira: {calculateAverage("mira").toFixed(2)}</p>
-              <p>Cover: {calculateAverage("cover").toFixed(2)}</p>
-              <p>Comunicacao: {calculateAverage("comunicacao").toFixed(2)}</p>
-              <p>Infectado: {calculateAverage("infectado").toFixed(2)}</p>
-              <p>Nocao: {calculateAverage("nocao").toFixed(2)}</p>
-              <p>
-                <em>({playerVotes.length} voto(s) recebido(s))</em>
-              </p>
-
-              <h2>Overall: {overall.toFixed(2)}</h2>
-            </>
+              <div className="overall-display">
+                <h3>OVERALL</h3>
+                <div className="overall-value">{overall.toFixed(2)}</div>
+                <small style={{ color: "#999" }}>
+                  baseado em {playerVotes.length} voto{playerVotes.length !== 1 ? "s" : ""}
+                </small>
+              </div>
+            </div>
           )}
         </div>
 
         {/* painel direito - ranking */}
-        <div
-          style={{
-            width: 340,
-            flexShrink: 0,
-            backgroundColor: "#1a1a2e",
-            borderRadius: 10,
-            padding: 20,
-            color: "#eee",
-          }}
-        >
-          <h2 style={{ margin: "0 0 15px", textAlign: "center" }}>
-            Ranking
-          </h2>
+        <div className="ranking-sidebar">
+          <h2>🏆 Ranking</h2>
 
           {ranking.length === 0 ? (
-            <p style={{ textAlign: "center", color: "#888" }}>
+            <p style={{ textAlign: "center", color: "#888", fontSize: "0.9rem" }}>
               Nenhum voto registrado ainda.
             </p>
           ) : (
-            ranking.map((p, index) => {
-              const medal =
-                index === 0
-                  ? "#FFD700"
-                  : index === 1
-                    ? "#C0C0C0"
-                    : index === 2
-                      ? "#CD7F32"
-                      : "#555";
+            <div className="ranking-list">
+              {ranking.map((p, index) => {
+                let medalClass = "medal-default";
+                let medalEmoji = "•";
 
-              return (
-                <div
-                  key={p.email}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "10px 12px",
-                    marginBottom: 8,
-                    backgroundColor: "#16213e",
-                    borderRadius: 8,
-                    borderLeft: `4px solid ${medal}`,
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: 20,
-                      fontWeight: "bold",
-                      color: medal,
-                      width: 30,
-                      textAlign: "center",
-                    }}
-                  >
-                    {index + 1}
-                  </span>
+                if (index === 0) {
+                  medalClass = "medal-gold";
+                  medalEmoji = "🥇";
+                } else if (index === 1) {
+                  medalClass = "medal-silver";
+                  medalEmoji = "🥈";
+                } else if (index === 2) {
+                  medalClass = "medal-bronze";
+                  medalEmoji = "🥉";
+                }
 
-                  <div style={{ flex: 1, marginLeft: 10 }}>
-                    <div style={{ fontWeight: "bold", fontSize: 15 }}>
-                      {p.name}
+                return (
+                  <div key={p.email} className={`ranking-item ${medalClass}`}>
+                    <div className="ranking-position">{medalEmoji}</div>
+                    <div className="ranking-info">
+                      <div className="ranking-name">#{index + 1} {p.name}</div>
+                      <div className="ranking-stats">
+                        {STATS.map((s) => (
+                          <span key={s}>
+                            {s.slice(0, 3)}: {p.averages[s]?.toFixed(1) ?? "0.0"}
+                          </span>
+                        ))}
+                      </div>
                     </div>
-                    <div style={{ fontSize: 11, color: "#aaa" }}>
-                      {STATS.map(
-                        (s) =>
-                          `${s}: ${p.averages[s]?.toFixed(1) ?? "0.0"}`
-                      ).join(" | ")}
-                    </div>
-                    <div style={{ fontSize: 11, color: "#888" }}>
-                      {p.votesCount} voto(s)
-                    </div>
+                    <div className="ranking-score">{p.overall.toFixed(1)}</div>
                   </div>
-
-                  <div
-                    style={{
-                      fontSize: 22,
-                      fontWeight: "bold",
-                      color: medal,
-                      marginLeft: 10,
-                    }}
-                  >
-                    {p.overall.toFixed(2)}
-                  </div>
-                </div>
-              );
-            })
+                );
+              })}
+            </div>
           )}
         </div>
       </div>

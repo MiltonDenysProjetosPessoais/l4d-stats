@@ -2,7 +2,7 @@
 .dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 100%);
-  padding: 20px 30px;
+  padding: 15px;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
@@ -57,13 +57,13 @@
 /* ==================== LAYOUT FLEX ==================== */
 .main-content {
   display: grid;
-  grid-template-columns: 1fr 1fr 350px;
+  grid-template-columns: 1fr 350px;
   gap: 20px;
+  max-width: 1400px;
   width: 100%;
   margin: 0 auto;
   flex: 1;
   min-width: 0;
-  box-sizing: border-box;
 }
 
 /* ==================== PAINEL ESQUERDO ==================== */
@@ -95,7 +95,7 @@
 
 .players-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 8px;
   margin-bottom: 10px;
 }
@@ -142,7 +142,7 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(102, 126, 234, 0.2);
   border-radius: 12px;
-  padding: 20px;
+  padding: 18px;
   backdrop-filter: blur(10px);
   flex-shrink: 0;
   overflow: hidden;
@@ -458,36 +458,10 @@ button {
 /* ==================== RESPONSIVIDADE ==================== */
 
 /* Tablets - 1025px até 1200px */
-@media (max-width: 1400px) {
-  .main-content {
-    grid-template-columns: 1fr 1fr 320px;
-    gap: 15px;
-  }
-
-  .ranking-sidebar {
-    max-height: 60vh;
-  }
-
-  .header h1 {
-    font-size: 1.6rem;
-  }
-}
-
-/* Tablets landscape - até 1024px */
 @media (max-width: 1200px) {
   .main-content {
     grid-template-columns: 1fr 320px;
     gap: 15px;
-  }
-
-  .voting-section {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-  }
-
-  .voting-section > .vote-card:first-child {
-    grid-column: 1 / -1;
   }
 
   .ranking-sidebar {
@@ -503,12 +477,6 @@ button {
 @media (max-width: 1024px) {
   .main-content {
     grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .voting-section {
-    display: flex;
-    flex-direction: column;
     gap: 15px;
   }
 

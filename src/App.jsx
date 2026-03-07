@@ -130,11 +130,6 @@ function Dashboard({ user, onLogout }) {
 
   const selectedPlayer = otherPlayers.find((p) => p.email === selectedEmail);
 
-  // votos recebidos pelo jogador selecionado
-  const playerVotes = selectedPlayer
-    ? votes.filter((v) => v.player === selectedPlayer.email)
-    : [];
-
   // verificar se ja votou neste jogador
   const alreadyVoted = selectedPlayer
     ? votes.some(
@@ -147,18 +142,20 @@ function Dashboard({ user, onLogout }) {
     votes.filter((v) => v.voter === user.email).map((v) => v.player)
   );
 
+  // usar a mesma funcao de calculo do ranking para evitar divergencias
+  const selectedPlayerStats = selectedPlayer
+    ? getPlayerStats(selectedPlayer.email, votes)
+    : { votesCount: 0, averages: {}, overall: 0 };
+
+  const playerVotes = selectedPlayer
+    ? votes.filter((v) => v.player === selectedPlayer.email)
+    : [];
+
   const calculateAverage = (stat) => {
-    if (playerVotes.length === 0) return 0;
-    const total = playerVotes.reduce((sum, v) => sum + v[stat], 0);
-    return total / playerVotes.length;
+    return selectedPlayerStats.averages[stat] || 0;
   };
 
-  const overall =
-    (calculateAverage("mira") +
-      calculateAverage("cover") +
-      calculateAverage("comunicacao") +
-      calculateAverage("infectado") +
-      calculateAverage("nocao")) / 5;
+  const overall = selectedPlayerStats.overall;
 
   // ranking: todos os jogadores ordenados por overall
   const ranking = useMemo(() => {

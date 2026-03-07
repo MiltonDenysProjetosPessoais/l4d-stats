@@ -1,6 +1,38 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import netlifyIdentity from "netlify-identity-widget";
+import Login from "./Login.jsx";
 
 export default function App() {
+  const [user, setUser] = useState(netlifyIdentity.currentUser());
+
+  useEffect(() => {
+    netlifyIdentity.init();
+  }, []);
+
+  const handleLogin = useCallback((loggedInUser) => {
+    setUser(loggedInUser);
+  }, []);
+
+  const handleLogout = () => {
+    netlifyIdentity.logout();
+    setUser(null);
+  };
+
+  useEffect(() => {
+    netlifyIdentity.on("logout", () => setUser(null));
+    return () => {
+      netlifyIdentity.off("logout");
+    };
+  }, []);
+
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
+
+  return <Dashboard user={user} onLogout={handleLogout} />;
+}
+
+function Dashboard({ user, onLogout }) {
   const [players, setPlayers] = useState([
     { nome: "Nick", votos: [] },
     { nome: "Ellis", votos: [] },
@@ -18,7 +50,7 @@ export default function App() {
 
   const player = players[selectedIndex];
 
-  // 🔥 carregar votos do servidor
+  // carregar votos do servidor
   const loadVotes = async () => {
     const res = await fetch("/.netlify/functions/vote");
     const data = await res.json();
@@ -33,7 +65,18 @@ export default function App() {
 
   // roda ao abrir o site
   useEffect(() => {
-    loadVotes();
+    const fetchVotes = async () => {
+      const res = await fetch("/.netlify/functions/vote");
+      const data = await res.json();
+
+      setPlayers((currentPlayers) =>
+        currentPlayers.map((p) => ({
+          ...p,
+          votos: data.filter((v) => v.player === p.nome),
+        }))
+      );
+    };
+    fetchVotes();
   }, []);
 
   // enviar voto
@@ -77,7 +120,13 @@ export default function App() {
 
   return (
     <div style={{ padding: 20, fontFamily: "Arial" }}>
-      <h1>L4D Stats Portal</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1>L4D Stats Portal</h1>
+        <div>
+          <span style={{ marginRight: 10 }}>{user.email}</span>
+          <button onClick={onLogout}>Sair</button>
+        </div>
+      </div>
 
       <h3>Jogadores</h3>
       {players.map((p, index) => (

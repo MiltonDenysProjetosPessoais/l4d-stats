@@ -46,31 +46,45 @@ function Dashboard({ user, onLogout }) {
     nocao: 3,
   });
 
+  const [error, setError] = useState(null);
+
   // registrar jogador no login e carregar dados
   useEffect(() => {
     const init = async () => {
-      // registrar o usuario como jogador
-      await fetch("/.netlify/functions/players", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user.email,
-          name: user.user_metadata?.full_name || user.email.split("@")[0],
-        }),
-      });
+      try {
+        // registrar o usuario como jogador
+        await fetch("/.netlify/functions/players", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: user.email,
+            name: user.user_metadata?.full_name || user.email.split("@")[0],
+          }),
+        });
 
-      // carregar jogadores e votos
-      const [playersRes, votesRes] = await Promise.all([
-        fetch("/.netlify/functions/players"),
-        fetch("/.netlify/functions/vote"),
-      ]);
+        // carregar jogadores e votos
+        const [playersRes, votesRes] = await Promise.all([
+          fetch("/.netlify/functions/players"),
+          fetch("/.netlify/functions/vote"),
+        ]);
 
-      const playersData = await playersRes.json();
-      const votesData = await votesRes.json();
+        if (!playersRes.ok || !votesRes.ok) {
+          throw new Error(
+            `Erro ao carregar dados: players=${playersRes.status} votes=${votesRes.status}`
+          );
+        }
 
-      setPlayers(playersData);
-      setVotes(votesData);
-      setLoading(false);
+        const playersData = await playersRes.json();
+        const votesData = await votesRes.json();
+
+        setPlayers(playersData);
+        setVotes(votesData);
+      } catch (err) {
+        console.error("Erro ao inicializar:", err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
     init();
   }, [user.email, user.user_metadata?.full_name]);
@@ -144,6 +158,18 @@ function Dashboard({ user, onLogout }) {
   };
 
   if (loading) return <div style={{ padding: 20 }}>Carregando...</div>;
+
+  if (error) {
+    return (
+      <div style={{ padding: 20, fontFamily: "Arial" }}>
+        <h1>L4D Stats Portal</h1>
+        <p style={{ color: "red" }}>Erro: {error}</p>
+        <button onClick={() => window.location.reload()}>Tentar novamente</button>
+        <br />
+        <button onClick={onLogout} style={{ marginTop: 10 }}>Sair</button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: 20, fontFamily: "Arial" }}>

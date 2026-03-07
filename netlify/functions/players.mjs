@@ -57,7 +57,3 @@ export default async (req, context) => {
 
   return new Response("Method not allowed", { status: 405 });
 };
-
-export const config = {
-  path: "/.netlify/functions/players",
-};

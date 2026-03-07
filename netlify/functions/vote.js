@@ -6,8 +6,8 @@ const dataPath = path.join(os.tmpdir(), "votes.json");
 
 exports.handler = async (event) => {
 
-  // ===== POST =====
   if (event.httpMethod === "POST") {
+
     const vote = JSON.parse(event.body);
 
     let votes = [];
@@ -26,8 +26,8 @@ exports.handler = async (event) => {
     };
   }
 
-  // ===== GET =====
   if (event.httpMethod === "GET") {
+
     if (!fs.existsSync(dataPath)) {
       return {
         statusCode: 200,
@@ -43,18 +43,17 @@ exports.handler = async (event) => {
     };
   }
 
-  // ===== DELETE =====
   if (event.httpMethod === "DELETE") {
+
     if (fs.existsSync(dataPath)) {
       fs.unlinkSync(dataPath);
     }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: "Votos apagados!" }),
+      body: JSON.stringify({ message: "Votos apagados" }),
     };
   }
 
-  // ===== METHOD NOT ALLOWED =====
   return { statusCode: 405 };
 };

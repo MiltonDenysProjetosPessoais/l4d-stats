@@ -1,6 +1,49 @@
 import { getStore } from "@netlify/blobs";
 
+// Mock data para desenvolvimento local
+const mockPlayers = [
+  {
+    email: "john.doe@example.com",
+    name: "John Doe",
+    registeredAt: "2025-01-01T10:00:00Z",
+  },
+  {
+    email: "jane.smith@example.com",
+    name: "Jane Smith",
+    registeredAt: "2025-01-02T10:00:00Z",
+  },
+  {
+    email: "alex.johnson@example.com",
+    name: "Alex Johnson",
+    registeredAt: "2025-01-03T10:00:00Z",
+  },
+  {
+    email: "chris.wilson@example.com",
+    name: "Chris Wilson",
+    registeredAt: "2025-01-04T10:00:00Z",
+  },
+  {
+    email: "sam.brown@example.com",
+    name: "Sam Brown",
+    registeredAt: "2025-01-05T10:00:00Z",
+  },
+];
+
+// Detecta modo desenvolvimento:
+// - netlify dev: NETLIFY_LOCAL_EMULATION=true ou falta NETLIFY_SITE_ID
+// - vite dev: DEV_MODE=true
+const isDev =
+  process.env.DEV_MODE === "true" ||
+  process.env.NETLIFY_LOCAL_EMULATION === "true" ||
+  !process.env.NETLIFY_SITE_ID;
+
 export default async (req, context) => {
+  // Em modo dev, usar dados de exemplo
+  if (isDev && req.method === "GET") {
+    console.log("[DEV MODE] Retornando dados de exemplo - Jogadores");
+    return new Response(JSON.stringify(mockPlayers), { status: 200 });
+  }
+
   const store = getStore({ name: "players", consistency: "strong" });
 
   // POST - register a player on login

@@ -29,13 +29,13 @@ const mockPlayers = [
   },
 ];
 
-// Detecta modo desenvolvimento:
-// - netlify dev: NETLIFY_LOCAL_EMULATION=true ou falta NETLIFY_SITE_ID
+// Detecta modo desenvolvimento LOCAL apenas:
+// - netlify dev: NETLIFY_LOCAL_EMULATION=true
 // - vite dev: DEV_MODE=true
+// Em produção (NETLIFY_BUILD_CONTEXT="production"), sempre usar banco de dados
 const isDev =
-  process.env.DEV_MODE === "true" ||
-  process.env.NETLIFY_LOCAL_EMULATION === "true" ||
-  !process.env.NETLIFY_SITE_ID;
+  (process.env.DEV_MODE === "true" || process.env.NETLIFY_LOCAL_EMULATION === "true") &&
+  process.env.NETLIFY_BUILD_CONTEXT !== "production";
 
 export default async (req, context) => {
   // Em modo dev, usar dados de exemplo

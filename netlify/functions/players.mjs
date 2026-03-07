@@ -30,16 +30,15 @@ const mockPlayers = [
 ];
 
 // Detecta modo desenvolvimento:
-// - Em produção: NETLIFY_BUILD_CONTEXT = "production"
-// - Em preview: NETLIFY_BUILD_CONTEXT = "deploy-preview"
-// - Em desenvolvimento local: variável não existe
+// - netlify dev: NETLIFY_LOCAL_EMULATION=true ou falta NETLIFY_SITE_ID
+// - vite dev: DEV_MODE=true
 const isDev =
   process.env.DEV_MODE === "true" ||
-  process.env.NETLIFY_BUILD_CONTEXT === "branch-deploy" ||
-  (typeof process.env.NETLIFY_BUILD_CONTEXT === "undefined" && process.env.NETLIFY_LOCAL_EMULATION === "true");
+  process.env.NETLIFY_LOCAL_EMULATION === "true" ||
+  !process.env.NETLIFY_SITE_ID;
 
 export default async (req, context) => {
-  // Em modo dev, usar dados de exemplo (APENAS em desenvolvimento local com netlify dev)
+  // Em modo dev, usar dados de exemplo
   if (isDev && req.method === "GET") {
     console.log("[DEV MODE] Retornando dados de exemplo - Jogadores");
     return new Response(JSON.stringify(mockPlayers), { status: 200 });

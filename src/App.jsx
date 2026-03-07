@@ -238,7 +238,7 @@ function Dashboard({ user, onLogout }) {
 
       {/* layout principal */}
       <div className="main-content">
-        {/* painel esquerdo - votacao */}
+        {/* coluna esquerda - seleção de jogadores */}
         <div className="voting-section">
           {/* seleção de jogadores */}
           <div className="vote-card">
@@ -259,7 +259,10 @@ function Dashboard({ user, onLogout }) {
               ))}
             </div>
           </div>
+        </div>
 
+        {/* coluna central - formulário de votação */}
+        <div className="voting-section">
           {/* formulário de votação */}
           {selectedPlayer && (
             <div className="vote-card">
@@ -342,7 +345,7 @@ function Dashboard({ user, onLogout }) {
           )}
         </div>
 
-        {/* painel direito - ranking */}
+        {/* coluna direita - ranking */}
         <div className="ranking-sidebar">
           <h2>🏆 Ranking</h2>
 

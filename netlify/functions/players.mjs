@@ -88,9 +88,27 @@ export default async (req, context) => {
     const key = email.replace(/[^a-zA-Z0-9]/g, "_");
     await store.delete(key);
 
-    return new Response(JSON.stringify({ message: "Jogador removido!" }), {
-      status: 200,
-    });
+    // Remover votos relacionados a esse jogador
+    try {
+      const votesStore = getStore({ name: "votes", consistency: "strong" });
+      const { blobs: voteBlobs } = await votesStore.list();
+      for (const blob of voteBlobs) {
+        const vote = await votesStore.get(blob.key, { type: "json" });
+        if (vote && (vote.voter === email || vote.player === email)) {
+          await votesStore.delete(blob.key);
+        }
+      }
+    } catch (e) {
+      // log error, mas não falha a deleção do jogador
+      console.error("Erro ao deletar votos relacionados ao jogador:", e);
+    }
+
+    return new Response(
+      JSON.stringify({ message: "Jogador e votos relacionados removidos!" }),
+      {
+        status: 200,
+      }
+    );
   }
 
   return new Response("Method not allowed", { status: 405 });

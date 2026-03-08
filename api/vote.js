@@ -5,22 +5,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
 });
 
-// Modo desenvolvimento: APENAS com VERCEL_ENV=development (vercel dev)
-const isDev = process.env.VERCEL_ENV === "development";
-
 export default async function handler(req, res) {
-  // Em modo dev LOCAL, usar dados de exemplo para GET
-  if (isDev && req.method === "GET") {
-    console.log("[DEV MODE LOCAL] Retornando dados de exemplo - Votos");
-    const filterPlayer = req.query.player;
-
-    const votes = filterPlayer
-      ? mockVotes.filter((v) => v.player === filterPlayer)
-      : mockVotes;
-
-    return res.status(200).json(votes);
-  }
-
   // POST - submit a vote (one vote per voter-votee pair)
   if (req.method === "POST") {
     const { voter, player, mira, cover, comunicacao, infectado, nocao } = req.body;

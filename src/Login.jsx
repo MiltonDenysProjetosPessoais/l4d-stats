@@ -1,4 +1,3 @@
-import { SignIn } from "@clerk/react";
 import { useEffect, useState } from "react";
 
 export default function Login({ onLogin }) {
@@ -7,7 +6,10 @@ export default function Login({ onLogin }) {
       <h2>Login</h2>
       <p>Faça login para votar nos jogadores</p>
       <div style={{ maxWidth: 300, margin: "0 auto" }}>
-        <SignIn />
+        {/* Substitua abaixo pelo componente Clerk, exemplo: <SignIn /> */}
+        <p style={{ color: "#888", textAlign: "center" }}>
+          Login via Clerk (implemente aqui o componente Clerk)
+        </p>
       </div>
     </div>
   );

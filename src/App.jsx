@@ -79,18 +79,35 @@ function App() {
       .sort((a, b) => b.overall - a.overall);
   }, [players, votes]);
 
-  const addVote = () => {
+  const addVote = async () => {
     if (!selectedPlayer || !visitorId) return;
-    setVotes([
-      ...votes,
-      {
-        voter: visitorId,
-        player: selectedPlayer.email,
-        ...vote,
-        createdAt: new Date().toISOString(),
-      },
-    ]);
-    alert("Voto enviado!");
+    const voteData = {
+      voter: visitorId,
+      player: selectedPlayer.email,
+      ...vote,
+      createdAt: new Date().toISOString(),
+    };
+    try {
+      const res = await fetch("/api/vote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(voteData),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        alert(err.error || "Erro ao votar");
+        return;
+      }
+      // Recarrega votos do backend
+      fetch("/api/vote")
+        .then((r) => r.json())
+        .then((data) => {
+          setVotes(data);
+        });
+      alert("Voto enviado!");
+    } catch (e) {
+      alert("Erro ao votar: " + e.message);
+    }
   };
 
   if (loading) {

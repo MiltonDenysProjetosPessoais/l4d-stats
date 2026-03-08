@@ -1,10 +1,27 @@
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
+import { useUser, Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import "./App.css";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
 export default function App() {
+  const { user, isSignedIn } = useUser();
+
+  if (!isSignedIn) {
+    return (
+      <header>
+        <Show when="signed-out">
+          <SignInButton />
+          <SignUpButton />
+        </Show>
+      </header>
+    );
+  }
+
+  return <Dashboard user={user} />;
+}
+
+function Dashboard({ user }) {
   const [players, setPlayers] = useState([]);
   const [votes, setVotes] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);

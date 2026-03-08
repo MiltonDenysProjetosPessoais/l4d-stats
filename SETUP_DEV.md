@@ -158,6 +158,20 @@ A detecção automática desativará o modo dev na Netlify e usará o banco de d
 
 ---
 
+## 🔑 Configuração do Login (Clerk)
+
+1. Crie uma conta gratuita em https://clerk.com/
+2. Crie um novo projeto e copie a **Publishable Key**.
+3. No arquivo `.env.development` e/ou `.env`, adicione:
+
+```
+VITE_CLERK_PUBLISHABLE_KEY=sua_publishable_key_aqui
+```
+
+4. Rode `npm run dev` normalmente. O login já estará integrado.
+
+---
+
 ## 📝 Próximos Passos
 
 - [ ] Testar validações com os dados mock

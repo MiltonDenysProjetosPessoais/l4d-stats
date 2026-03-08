@@ -1,25 +1,26 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { ClerkProvider, SignedIn, SignedOut, UserButton, useUser } from "@clerk/clerk-react";
 import Login from "./Login.jsx";
 import "./App.css";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
 export default function App() {
-  const [user, setUser] = useState(null);
+  return (
+    <ClerkProvider publishableKey={import.meta.env.VITE_CLERK_PUBLISHABLE_KEY}>
+      <SignedIn>
+        <DashboardWithUser />
+      </SignedIn>
+      <SignedOut>
+        <Login />
+      </SignedOut>
+    </ClerkProvider>
+  );
+}
 
-  const handleLogin = (loggedInUser) => {
-    setUser(loggedInUser);
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-  };
-
-  if (!user) {
-    return <Login onLogin={handleLogin} />;
-  }
-
-  return <Dashboard user={user} onLogout={handleLogout} />;
+function DashboardWithUser() {
+  const { user } = useUser();
+  return <Dashboard user={user} onLogout={() => window.location.reload()} />;
 }
 
 // calcula overall de um jogador a partir dos votos recebidos

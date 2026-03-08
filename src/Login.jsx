@@ -1,24 +1,30 @@
 import { useEffect, useState } from "react";
 import netlifyIdentity from "netlify-identity-widget";
 
+function isNetlify() {
+  // Detecta se está rodando em Netlify
+  return window.location.hostname.endsWith("netlify.app") || window.location.hostname.endsWith("netlify.com");
+}
+
 export default function Login({ onLogin }) {
   const [isLocalDev, setIsLocalDev] = useState(false);
   const [devEmail, setDevEmail] = useState("");
+  const [showNetlifyIdentity, setShowNetlifyIdentity] = useState(false);
 
   useEffect(() => {
-    // Detect local dev mode
     setIsLocalDev(
-      !window.location.hostname.includes("netlify.app") &&
-        (window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1")
+      window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1"
     );
-    netlifyIdentity.on("login", (user) => {
-      onLogin(user);
-      netlifyIdentity.close();
-    });
-    return () => {
-      netlifyIdentity.off("login");
-    };
+    setShowNetlifyIdentity(isNetlify());
+    if (isNetlify()) {
+      netlifyIdentity.on("login", (user) => {
+        onLogin(user);
+        netlifyIdentity.close();
+      });
+      return () => {
+        netlifyIdentity.off("login");
+      };
+    }
   }, [onLogin]);
 
   const handleLogin = () => {
@@ -27,7 +33,6 @@ export default function Login({ onLogin }) {
 
   const handleDevLogin = (e) => {
     e.preventDefault();
-    // Simulate login in dev mode
     onLogin({ email: devEmail, name: devEmail.split("@")[0] });
   };
 
@@ -72,7 +77,7 @@ export default function Login({ onLogin }) {
               </button>
             </form>
           </>
-        ) : (
+        ) : showNetlifyIdentity ? (
           <>
             <button
               onClick={handleLogin}
@@ -90,6 +95,10 @@ export default function Login({ onLogin }) {
               Entrar com Netlify Identity
             </button>
           </>
+        ) : (
+          <p style={{ color: "#888", textAlign: "center" }}>
+            Login Netlify Identity disponível apenas em sites hospedados no Netlify.
+          </p>
         )}
       </div>
     </div>

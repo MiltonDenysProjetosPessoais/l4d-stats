@@ -20,7 +20,16 @@ export default function App() {
 
 function DashboardWithUser() {
   const { user } = useUser();
-  return <Dashboard user={user} onLogout={() => window.location.reload()} />;
+  // Clerk: user.primaryEmailAddress?.emailAddress e user.fullName
+  if (!user) {
+    return <div style={{color: 'red', padding: 40}}>Erro: Usuário não autenticado.</div>;
+  }
+  // Adaptar para Clerk
+  const userData = {
+    email: user.primaryEmailAddress?.emailAddress || user.emailAddress,
+    name: user.fullName || user.username || (user.primaryEmailAddress?.emailAddress?.split("@")[0] ?? "")
+  };
+  return <Dashboard user={userData} onLogout={() => window.location.reload()} />;
 }
 
 // calcula overall de um jogador a partir dos votos recebidos
@@ -68,7 +77,7 @@ function Dashboard({ user, onLogout }) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email: user.email,
-            name: user.user_metadata?.full_name || user.email.split("@")[0],
+            name: user.name,
           }),
         });
 
@@ -97,7 +106,7 @@ function Dashboard({ user, onLogout }) {
       }
     };
     init();
-  }, [user.email, user.user_metadata?.full_name]);
+  }, [user.email, user.name]);
 
   const loadData = async () => {
     const [playersRes, votesRes] = await Promise.all([

@@ -50,8 +50,8 @@ function getPlayerStats(playerEmail, allVotes) {
 
 Abra o DevTools (F12) e cole:
 
-fetch("/api/players").then(r => r.json()).then(console.log)
-// Deve retornar os 5 jogadores
+fetch("/.netlify/functions/players").then(r => r.json()).then(console.log)
+fetch("/.netlify/functions/vote").then(r => r.json()).then(console.log)
 
 fetch("/api/vote").then(r => r.json()).then(console.log)
 // Deve retornar 13 votos
@@ -180,12 +180,12 @@ const expectedRanking = [
 
 3. Abra o DevTools (F12) -> Console
 
-4. Cole este código para verificar os dados:
+fetch("/.netlify/functions/players")
 
 // Verificar dados carregados
 fetch("/api/players")
   .then(r => r.json())
-  .then(players => {
+    return fetch("/.netlify/functions/vote")
     console.log("JOGADORES:", players);
     return fetch("/api/vote")
       .then(r => r.json())

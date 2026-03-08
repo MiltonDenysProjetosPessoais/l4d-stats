@@ -1,59 +1,10 @@
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/react";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import netlifyIdentity from "netlify-identity-widget";
-import Login from "./Login.jsx";
 import "./App.css";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
 export default function App() {
-  const [user, setUser] = useState(netlifyIdentity.currentUser());
-
-  useEffect(() => {
-    netlifyIdentity.init();
-  }, []);
-
-  useEffect(() => {
-    netlifyIdentity.on("logout", () => setUser(null));
-    return () => {
-      netlifyIdentity.off("logout");
-    };
-  }, []);
-
-  const handleLogin = useCallback((loggedInUser) => {
-    setUser(loggedInUser);
-  }, []);
-
-  const handleLogout = () => {
-    netlifyIdentity.logout();
-  };
-
-  if (!user) {
-    return <Login onLogin={handleLogin} />;
-  }
-
-  return <Dashboard user={user} onLogout={handleLogout} />;
-}
-
-// calcula overall de um jogador a partir dos votos recebidos
-function getPlayerStats(playerEmail, allVotes) {
-  const pVotes = allVotes.filter((v) => v.player === playerEmail);
-  if (pVotes.length === 0) {
-    return { votesCount: 0, averages: {}, overall: 0 };
-  }
-
-  const averages = {};
-  for (const stat of STATS) {
-    const total = pVotes.reduce((sum, v) => sum + (v[stat] || 0), 0);
-    averages[stat] = total / pVotes.length;
-  }
-
-  const overall =
-    STATS.reduce((sum, stat) => sum + averages[stat], 0) / STATS.length;
-
-  return { votesCount: pVotes.length, averages, overall };
-}
-
-function Dashboard({ user, onLogout }) {
   const [players, setPlayers] = useState([]);
   const [votes, setVotes] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);

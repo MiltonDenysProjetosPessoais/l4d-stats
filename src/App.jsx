@@ -1,25 +1,10 @@
-  return (
-    }
-  };
-            name: user.user_metadata?.full_name || user.email.split("@")[0],
-  }, [user.email, user.user_metadata?.full_name]);
-    name: user.fullName || user.username || (user.primaryEmailAddress?.emailAddress?.split("@")[0] ?? "")
-  };
-  return <Dashboard user={userData} onLogout={() => window.location.reload()} />;
-  const handleLogin = useCallback((loggedInUser) => {
-    setUser(loggedInUser);
-  }, []);
-
-  const handleLogout = () => {
-    try {
 import { useState, useEffect, useCallback, useMemo } from "react";
-import netlifyIdentity from "netlify-identity-widget";
 import Login from "./Login.jsx";
 import "./App.css";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
-export default function App() {
+function App() {
   const [user, setUser] = useState(netlifyIdentity.currentUser());
 
   useEffect(() => {
@@ -403,3 +388,6 @@ function Dashboard({ user, onLogout }) {
     </div>
   );
 }
+
+export default App;
+

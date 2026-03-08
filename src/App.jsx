@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import "./App.css";
-import { mockPlayers, mockVotes } from "./mockData";
+import { mockPlayers } from "./mockData";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
@@ -20,12 +20,13 @@ function App() {
   const [visitorId, setVisitorId] = useState(null);
 
   useEffect(() => {
-    // Simula carregamento dos dados mock
-    setTimeout(() => {
-      setPlayers(mockPlayers);
-      setVotes(mockVotes);
-      setLoading(false);
-    }, 500);
+    // setPlayers(mockPlayers);
+    fetch("/api/vote")
+      .then((r) => r.json())
+      .then((data) => {
+        setVotes(data);
+        setLoading(false);
+      });
   }, []);
 
   useEffect(() => {

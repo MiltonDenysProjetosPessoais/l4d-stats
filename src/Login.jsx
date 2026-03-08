@@ -1,4 +1,4 @@
-import { SignIn } from "@clerk/clerk-react";
+import { SignIn } from "@clerk/react";
 import { useEffect, useState } from "react";
 
 export default function Login({ onLogin }) {

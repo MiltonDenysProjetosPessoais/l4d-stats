@@ -1,36 +1,18 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useUser, SignOutButton } from "@clerk/react";
 import Login from "./Login.jsx";
 import "./App.css";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
 function App() {
-  const [user, setUser] = useState(netlifyIdentity.currentUser());
+  const { isSignedIn, user } = useUser();
 
-  useEffect(() => {
-    netlifyIdentity.init();
-  }, []);
-
-  useEffect(() => {
-    netlifyIdentity.on("logout", () => setUser(null));
-    return () => {
-      netlifyIdentity.off("logout");
-    };
-  }, []);
-
-  const handleLogin = useCallback((loggedInUser) => {
-    setUser(loggedInUser);
-  }, []);
-
-  const handleLogout = () => {
-    netlifyIdentity.logout();
-  };
-
-  if (!user) {
-    return <Login onLogin={handleLogin} />;
+  if (!isSignedIn) {
+    return <Login />;
   }
 
-  return <Dashboard user={user} onLogout={handleLogout} />;
+  return <Dashboard user={user} />;
 }
 
 // calcula overall de um jogador a partir dos votos recebidos
@@ -52,7 +34,7 @@ function getPlayerStats(playerEmail, allVotes) {
   return { votesCount: pVotes.length, averages, overall };
 }
 
-function Dashboard({ user, onLogout }) {
+function Dashboard({ user }) {
   const [players, setPlayers] = useState([]);
   const [votes, setVotes] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);
@@ -77,8 +59,8 @@ function Dashboard({ user, onLogout }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: user.email,
-            name: user.name,
+            email: user.primaryEmailAddress?.emailAddress || user.emailAddress,
+            name: user.fullName || user.username || user.id,
           }),
         });
 
@@ -107,7 +89,7 @@ function Dashboard({ user, onLogout }) {
       }
     };
     init();
-  }, [user.email, user.name]);
+  }, [user]);
 
   const loadData = async () => {
     const [playersRes, votesRes] = await Promise.all([
@@ -121,7 +103,7 @@ function Dashboard({ user, onLogout }) {
   };
 
   // outros jogadores (nao mostra voce mesmo)
-  const otherPlayers = players.filter((p) => p.email !== user.email);
+  const otherPlayers = players.filter((p) => p.email !== (user.primaryEmailAddress?.emailAddress || user.emailAddress));
 
   const selectedPlayer = otherPlayers.find((p) => p.email === selectedEmail);
 
@@ -224,9 +206,11 @@ function Dashboard({ user, onLogout }) {
         <div className="header-right">
           <div className="user-info">
             <span>👤</span>
-            <span className="user-email">{user.email}</span>
+            <span className="user-email">{user.primaryEmailAddress?.emailAddress || user.emailAddress}</span>
           </div>
-          <button className="btn-danger" onClick={onLogout}>Sair</button>
+          <SignOutButton>
+            <button className="btn-danger">Sair</button>
+          </SignOutButton>
         </div>
       </div>
 

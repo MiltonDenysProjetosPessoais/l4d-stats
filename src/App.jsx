@@ -79,7 +79,7 @@ function Dashboard({ user, onLogout }) {
     const init = async () => {
       try {
         // registrar o usuario como jogador
-        await fetch("/.netlify/functions/players", {
+        await fetch("/api/players", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -90,8 +90,8 @@ function Dashboard({ user, onLogout }) {
 
         // carregar jogadores e votos
         const [playersRes, votesRes] = await Promise.all([
-          fetch("/.netlify/functions/players"),
-          fetch("/.netlify/functions/vote"),
+          fetch("/api/players"),
+          fetch("/api/vote"),
         ]);
 
         if (!playersRes.ok || !votesRes.ok) {
@@ -117,8 +117,8 @@ function Dashboard({ user, onLogout }) {
 
   const loadData = async () => {
     const [playersRes, votesRes] = await Promise.all([
-      fetch("/.netlify/functions/players"),
-      fetch("/.netlify/functions/vote"),
+      fetch("/api/players"),
+      fetch("/api/vote"),
     ]);
     const playersData = await playersRes.json();
     const votesData = await votesRes.json();
@@ -170,7 +170,7 @@ function Dashboard({ user, onLogout }) {
   }, [players, votes]);
 
   const addVote = async () => {
-    const res = await fetch("/.netlify/functions/vote", {
+    const res = await fetch("/api/vote", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

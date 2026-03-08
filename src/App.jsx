@@ -50,6 +50,9 @@ function Dashboard({ user }) {
 
   const [error, setError] = useState(null);
 
+  // Helper para obter o email do usuário Clerk
+  const userEmail = user.primaryEmailAddress?.emailAddress || user.emailAddress;
+
   // registrar jogador no login e carregar dados
   useEffect(() => {
     const init = async () => {
@@ -59,7 +62,7 @@ function Dashboard({ user }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            email: user.primaryEmailAddress?.emailAddress || user.emailAddress,
+            email: userEmail,
             name: user.fullName || user.username || user.id,
           }),
         });
@@ -89,7 +92,7 @@ function Dashboard({ user }) {
       }
     };
     init();
-  }, [user]);
+  }, [userEmail, user.fullName, user.username, user.id]);
 
   const loadData = async () => {
     const [playersRes, votesRes] = await Promise.all([
@@ -103,20 +106,20 @@ function Dashboard({ user }) {
   };
 
   // outros jogadores (nao mostra voce mesmo)
-  const otherPlayers = players.filter((p) => p.email !== (user.primaryEmailAddress?.emailAddress || user.emailAddress));
+  const otherPlayers = players.filter((p) => p.email !== userEmail);
 
   const selectedPlayer = otherPlayers.find((p) => p.email === selectedEmail);
 
   // verificar se ja votou neste jogador
   const alreadyVoted = selectedPlayer
     ? votes.some(
-        (v) => v.voter === user.email && v.player === selectedPlayer.email
+        (v) => v.voter === userEmail && v.player === selectedPlayer.email
       )
     : false;
 
   // verificar em quem ja votou
   const votedEmails = new Set(
-    votes.filter((v) => v.voter === user.email).map((v) => v.player)
+    votes.filter((v) => v.voter === userEmail).map((v) => v.player)
   );
 
   // usar a mesma funcao de calculo do ranking para evitar divergencias
@@ -150,7 +153,7 @@ function Dashboard({ user }) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        voter: user.email,
+        voter: userEmail,
         player: selectedPlayer.email,
         ...vote,
       }),
@@ -183,7 +186,9 @@ function Dashboard({ user }) {
         <div className="header">
           <h1>⚔️ L4D Stats Portal</h1>
           <div className="header-right">
-            <button className="btn-danger" onClick={onLogout}>Sair</button>
+            <SignOutButton>
+              <button className="btn-danger">Sair</button>
+            </SignOutButton>
           </div>
         </div>
         <div className="vote-card" style={{ maxWidth: "600px", margin: "50px auto" }}>

@@ -1,45 +1,13 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
-import { useUser, SignOutButton } from "@clerk/react";
-import Login from "./Login.jsx";
+import { useState, useEffect, useMemo } from "react";
 import "./App.css";
+import { mockPlayers, mockVotes } from "./mockData";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
 function App() {
-  const { isSignedIn, user } = useUser();
-
-  if (!isSignedIn) {
-    return <Login />;
-  }
-
-  return <Dashboard user={user} />;
-}
-
-// calcula overall de um jogador a partir dos votos recebidos
-function getPlayerStats(playerEmail, allVotes) {
-  const pVotes = allVotes.filter((v) => v.player === playerEmail);
-  if (pVotes.length === 0) {
-    return { votesCount: 0, averages: {}, overall: 0 };
-  }
-
-  const averages = {};
-  for (const stat of STATS) {
-    const total = pVotes.reduce((sum, v) => sum + (v[stat] || 0), 0);
-    averages[stat] = total / pVotes.length;
-  }
-
-  const overall =
-    STATS.reduce((sum, stat) => sum + averages[stat], 0) / STATS.length;
-
-  return { votesCount: pVotes.length, averages, overall };
-}
-
-function Dashboard({ user }) {
   const [players, setPlayers] = useState([]);
   const [votes, setVotes] = useState([]);
   const [selectedEmail, setSelectedEmail] = useState(null);
-  const [loading, setLoading] = useState(true);
-
   const [vote, setVote] = useState({
     mira: 3,
     cover: 3,
@@ -47,97 +15,45 @@ function Dashboard({ user }) {
     infectado: 3,
     nocao: 3,
   });
+  const [loading, setLoading] = useState(true);
 
-  const [error, setError] = useState(null);
-
-  // Helper para obter o email do usuário Clerk
-  const userEmail = user.primaryEmailAddress?.emailAddress || user.emailAddress;
-
-  // registrar jogador no login e carregar dados
   useEffect(() => {
-    const init = async () => {
-      try {
-        // registrar o usuario como jogador
-        await fetch("/api/players", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: userEmail,
-            name: user.fullName || user.username || user.id,
-          }),
-        });
+    // Simula carregamento dos dados mock
+    setTimeout(() => {
+      setPlayers(mockPlayers);
+      setVotes(mockVotes);
+      setLoading(false);
+    }, 500);
+  }, []);
 
-        // carregar jogadores e votos
-        const [playersRes, votesRes] = await Promise.all([
-          fetch("/api/players"),
-          fetch("/api/vote"),
-        ]);
-
-        if (!playersRes.ok || !votesRes.ok) {
-          throw new Error(
-            `Erro ao carregar dados: players=${playersRes.status} votes=${votesRes.status}`
-          );
-        }
-
-        const playersData = await playersRes.json();
-        const votesData = await votesRes.json();
-
-        setPlayers(playersData);
-        setVotes(votesData);
-      } catch (err) {
-        console.error("Erro ao inicializar:", err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, [userEmail, user.fullName, user.username, user.id]);
-
-  const loadData = async () => {
-    const [playersRes, votesRes] = await Promise.all([
-      fetch("/api/players"),
-      fetch("/api/vote"),
-    ]);
-    const playersData = await playersRes.json();
-    const votesData = await votesRes.json();
-    setPlayers(playersData);
-    setVotes(votesData);
-  };
-
-  // outros jogadores (nao mostra voce mesmo)
-  const otherPlayers = players.filter((p) => p.email !== userEmail);
-
+  const otherPlayers = players;
   const selectedPlayer = otherPlayers.find((p) => p.email === selectedEmail);
-
-  // verificar se ja votou neste jogador
-  const alreadyVoted = selectedPlayer
-    ? votes.some(
-        (v) => v.voter === userEmail && v.player === selectedPlayer.email
-      )
-    : false;
-
-  // verificar em quem ja votou
-  const votedEmails = new Set(
-    votes.filter((v) => v.voter === userEmail).map((v) => v.player)
-  );
-
-  // usar a mesma funcao de calculo do ranking para evitar divergencias
-  const selectedPlayerStats = selectedPlayer
-    ? getPlayerStats(selectedPlayer.email, votes)
-    : { votesCount: 0, averages: {}, overall: 0 };
-
   const playerVotes = selectedPlayer
     ? votes.filter((v) => v.player === selectedPlayer.email)
     : [];
+  const votedEmails = new Set(votes.map((v) => v.player));
 
-  const calculateAverage = (stat) => {
-    return selectedPlayerStats.averages[stat] || 0;
-  };
+  function getPlayerStats(playerEmail, allVotes) {
+    const pVotes = allVotes.filter((v) => v.player === playerEmail);
+    if (pVotes.length === 0) {
+      return { votesCount: 0, averages: {}, overall: 0 };
+    }
+    const averages = {};
+    for (const stat of STATS) {
+      const total = pVotes.reduce((sum, v) => sum + (v[stat] || 0), 0);
+      averages[stat] = total / pVotes.length;
+    }
+    const overall =
+      STATS.reduce((sum, stat) => sum + averages[stat], 0) / STATS.length;
+    return { votesCount: pVotes.length, averages, overall };
+  }
 
+  const selectedPlayerStats = selectedPlayer
+    ? getPlayerStats(selectedPlayer.email, votes)
+    : { votesCount: 0, averages: {}, overall: 0 };
+  const calculateAverage = (stat) => selectedPlayerStats.averages[stat] || 0;
   const overall = selectedPlayerStats.overall;
 
-  // ranking: todos os jogadores ordenados por overall
   const ranking = useMemo(() => {
     return players
       .map((p) => {
@@ -148,56 +64,32 @@ function Dashboard({ user }) {
       .sort((a, b) => b.overall - a.overall);
   }, [players, votes]);
 
-  const addVote = async () => {
-    const res = await fetch("/api/vote", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        voter: userEmail,
+  const addVote = () => {
+    if (!selectedPlayer) return;
+    setVotes([
+      ...votes,
+      {
+        voter: "anon@example.com",
         player: selectedPlayer.email,
         ...vote,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (res.status === 409) {
-      alert(data.error);
-      return;
-    }
-
-    await loadData();
+        createdAt: new Date().toISOString(),
+      },
+    ]);
     alert("Voto enviado!");
   };
 
   if (loading) {
     return (
-      <div className="dashboard" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div
+        className="dashboard"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <div style={{ textAlign: "center" }}>
           <h2>⏳ Carregando...</h2>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="dashboard">
-        <div className="header">
-          <h1>⚔️ L4D Stats Portal</h1>
-          <div className="header-right">
-            <SignOutButton>
-              <button className="btn-danger">Sair</button>
-            </SignOutButton>
-          </div>
-        </div>
-        <div className="vote-card" style={{ maxWidth: "600px", margin: "50px auto" }}>
-          <div className="status-message status-error">
-            ❌ Erro: {error}
-          </div>
-          <button className="btn-primary" onClick={() => window.location.reload()}>
-            Tentar novamente
-          </button>
         </div>
       </div>
     );
@@ -208,15 +100,6 @@ function Dashboard({ user }) {
       {/* header */}
       <div className="header">
         <h1>⚔️ L4D Stats Portal</h1>
-        <div className="header-right">
-          <div className="user-info">
-            <span>👤</span>
-            <span className="user-email">{user.primaryEmailAddress?.emailAddress || user.emailAddress}</span>
-          </div>
-          <SignOutButton>
-            <button className="btn-danger">Sair</button>
-          </SignOutButton>
-        </div>
       </div>
 
       {/* layout principal */}
@@ -227,17 +110,23 @@ function Dashboard({ user }) {
           <div className="vote-card">
             <h3>👥 Selecione um Jogador</h3>
             {otherPlayers.length === 0 && (
-              <p style={{ color: "#888", textAlign: "center" }}>Nenhum outro jogador cadastrado ainda.</p>
+              <p style={{ color: "#888", textAlign: "center" }}>
+                Nenhum outro jogador cadastrado ainda.
+              </p>
             )}
             <div className="players-grid">
               {otherPlayers.map((p) => (
                 <button
                   key={p.email}
                   onClick={() => setSelectedEmail(p.email)}
-                  className={`player-btn ${selectedEmail === p.email ? "selected" : ""}`}
+                  className={`player-btn ${
+                    selectedEmail === p.email ? "selected" : ""
+                  }`}
                 >
                   {p.name}
-                  {votedEmails.has(p.email) && <span className="player-badge">✓ votado</span>}
+                  {votedEmails.has(p.email) && (
+                    <span className="player-badge">✓ votado</span>
+                  )}
                 </button>
               ))}
             </div>
@@ -250,43 +139,37 @@ function Dashboard({ user }) {
           {selectedPlayer && (
             <div className="vote-card">
               <h2>🎯 Votar em: {selectedPlayer.name}</h2>
-
-              {alreadyVoted ? (
-                <div className="status-message status-success">
-                  ✓ Você já votou neste jogador
-                </div>
-              ) : (
-                <>
-                  <h3>Avalie os Atributos</h3>
-                  <div className="vote-inputs">
-                    {Object.keys(vote).map((stat) => (
-                      <div key={stat} className="vote-input-group">
-                        <label htmlFor={stat}>{stat}</label>
-                        <input
-                          id={stat}
-                          type="range"
-                          min="0"
-                          max="5"
-                          value={vote[stat]}
-                          onChange={(e) =>
-                            setVote({
-                              ...vote,
-                              [stat]: Number(e.target.value),
-                            })
-                          }
-                          style={{ cursor: "pointer" }}
-                        />
-                        <span style={{ minWidth: "30px", textAlign: "right", fontWeight: "bold" }}>
-                          {vote[stat]}/5
-                        </span>
-                      </div>
-                    ))}
+              <h3>Avalie os Atributos</h3>
+              <div className="vote-inputs">
+                {Object.keys(vote).map((stat) => (
+                  <div key={stat} className="vote-input-group">
+                    <label htmlFor={stat}>{stat}</label>
+                    <input
+                      id={stat}
+                      type="range"
+                      min="0"
+                      max="5"
+                      value={vote[stat]}
+                      onChange={(e) =>
+                        setVote({ ...vote, [stat]: Number(e.target.value) })
+                      }
+                      style={{ cursor: "pointer" }}
+                    />
+                    <span
+                      style={{
+                        minWidth: "30px",
+                        textAlign: "right",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {vote[stat]}/5
+                    </span>
                   </div>
-                  <button className="btn-primary" onClick={addVote}>
-                    Enviar Voto
-                  </button>
-                </>
-              )}
+                ))}
+              </div>
+              <button className="btn-primary" onClick={addVote}>
+                Enviar Voto
+              </button>
             </div>
           )}
 
@@ -321,7 +204,8 @@ function Dashboard({ user }) {
                 <h3>OVERALL</h3>
                 <div className="overall-value">{overall.toFixed(2)}</div>
                 <small style={{ color: "#999" }}>
-                  baseado em {playerVotes.length} voto{playerVotes.length !== 1 ? "s" : ""}
+                  baseado em{" "}
+                  {playerVotes.length} voto{playerVotes.length !== 1 ? "s" : ""}
                 </small>
               </div>
             </div>
@@ -333,7 +217,13 @@ function Dashboard({ user }) {
           <h2>🏆 Ranking</h2>
 
           {ranking.length === 0 ? (
-            <p style={{ textAlign: "center", color: "#888", fontSize: "0.9rem" }}>
+            <p
+              style={{
+                textAlign: "center",
+                color: "#888",
+                fontSize: "0.9rem",
+              }}
+            >
               Nenhum voto registrado ainda.
             </p>
           ) : (
@@ -357,7 +247,9 @@ function Dashboard({ user }) {
                   <div key={p.email} className={`ranking-item ${medalClass}`}>
                     <div className="ranking-position">{medalEmoji}</div>
                     <div className="ranking-info">
-                      <div className="ranking-name">#{index + 1} {p.name}</div>
+                      <div className="ranking-name">
+                        #{index + 1} {p.name}
+                      </div>
                       <div className="ranking-stats">
                         {STATS.map((s) => (
                           <span key={s}>

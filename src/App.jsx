@@ -229,6 +229,9 @@ function Dashboard({ user, onLogout }) {
         <h1>⚔️ L4D Stats Portal</h1>
         <div className="header-right">
           <div className="user-info">
+            <span style={{ marginRight: 12, fontWeight: 500, color: '#2a7' }}>
+              Olá, {user.user_metadata?.full_name || user.email.split("@")[0]}
+            </span>
             <span>👤</span>
             <span className="user-email">{user.email}</span>
           </div>

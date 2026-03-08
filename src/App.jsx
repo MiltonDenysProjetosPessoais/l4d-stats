@@ -116,6 +116,51 @@ function App() {
         <h1>⚔️ L4D Stats Portal</h1>
       </div>
 
+      {/* NOVO: ranking acima dos nomes */}
+      <div className="ranking-topbar">
+        <h2>🏆 Ranking</h2>
+        {ranking.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#888", fontSize: "0.9rem" }}>
+            Nenhum voto registrado ainda.
+          </p>
+        ) : (
+          <div className="ranking-list ranking-list-topbar">
+            {ranking.map((p, index) => {
+              let medalClass = "medal-default";
+              let medalEmoji = "•";
+              if (index === 0) {
+                medalClass = "medal-gold";
+                medalEmoji = "🥇";
+              } else if (index === 1) {
+                medalClass = "medal-silver";
+                medalEmoji = "🥈";
+              } else if (index === 2) {
+                medalClass = "medal-bronze";
+                medalEmoji = "🥉";
+              }
+              return (
+                <div key={p.email} className={`ranking-item ${medalClass}` } style={{minWidth: 180}}>
+                  <div className="ranking-position">{medalEmoji}</div>
+                  <div className="ranking-info">
+                    <div className="ranking-name">
+                      #{index + 1} {p.name}
+                    </div>
+                    <div className="ranking-stats">
+                      <span>Mira - {p.averages.mira?.toFixed(2) ?? "-"}</span>
+                      <span>Cover - {p.averages.cover?.toFixed(2) ?? "-"}</span>
+                      <span>Comunicacao - {p.averages.comunicacao?.toFixed(2) ?? "-"}</span>
+                      <span>Infectado - {p.averages.infectado?.toFixed(2) ?? "-"}</span>
+                      <span>Nocao - {p.averages.nocao?.toFixed(2) ?? "-"}</span>
+                    </div>
+                  </div>
+                  <div className="ranking-score">{p.overall.toFixed(1)}</div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* layout principal */}
       <div className="main-content">
         {/* coluna esquerda - seleção de jogadores */}
@@ -222,60 +267,6 @@ function App() {
                   {playerVotes.length} voto{playerVotes.length !== 1 ? "s" : ""}
                 </small>
               </div>
-            </div>
-          )}
-        </div>
-
-        {/* coluna direita - ranking */}
-        <div className="ranking-sidebar">
-          <h2>🏆 Ranking</h2>
-
-          {ranking.length === 0 ? (
-            <p
-              style={{
-                textAlign: "center",
-                color: "#888",
-                fontSize: "0.9rem",
-              }}
-            >
-              Nenhum voto registrado ainda.
-            </p>
-          ) : (
-            <div className="ranking-list">
-              {ranking.map((p, index) => {
-                let medalClass = "medal-default";
-                let medalEmoji = "•";
-
-                if (index === 0) {
-                  medalClass = "medal-gold";
-                  medalEmoji = "🥇";
-                } else if (index === 1) {
-                  medalClass = "medal-silver";
-                  medalEmoji = "🥈";
-                } else if (index === 2) {
-                  medalClass = "medal-bronze";
-                  medalEmoji = "🥉";
-                }
-
-                return (
-                  <div key={p.email} className={`ranking-item ${medalClass}`}>
-                    <div className="ranking-position">{medalEmoji}</div>
-                    <div className="ranking-info">
-                      <div className="ranking-name">
-                        #{index + 1} {p.name}
-                      </div>
-                      <div className="ranking-stats">
-                        {STATS.map((s) => (
-                          <span key={s}>
-                            {s.slice(0, 3)}: {p.averages[s]?.toFixed(1) ?? "0.0"}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="ranking-score">{p.overall.toFixed(1)}</div>
-                  </div>
-                );
-              })}
             </div>
           )}
         </div>

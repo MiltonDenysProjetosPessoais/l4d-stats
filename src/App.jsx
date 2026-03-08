@@ -20,7 +20,7 @@ function App() {
   const [visitorId, setVisitorId] = useState(null);
 
   useEffect(() => {
-    // setPlayers(mockPlayers);
+    setPlayers(mockPlayers); // Garante que os nomes dos jogadores aparecem sempre
     fetch("/api/vote")
       .then((r) => r.json())
       .then((data) => {

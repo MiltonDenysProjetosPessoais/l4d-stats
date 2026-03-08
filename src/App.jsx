@@ -1,36 +1,19 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import netlifyIdentity from "netlify-identity-widget";
 import Login from "./Login.jsx";
 import "./App.css";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
 export default function App() {
-  const [user, setUser] = useState(netlifyIdentity.currentUser());
+  const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    netlifyIdentity.init();
-  }, []);
-
-  const handleLogin = useCallback((loggedInUser) => {
+  const handleLogin = (loggedInUser) => {
     setUser(loggedInUser);
-  }, []);
-
-  const handleLogout = () => {
-    try {
-      netlifyIdentity.logout();
-    } catch {
-      // dev mode: no real session to logout from
-    }
-    setUser(null);
   };
 
-  useEffect(() => {
-    netlifyIdentity.on("logout", () => setUser(null));
-    return () => {
-      netlifyIdentity.off("logout");
-    };
-  }, []);
+  const handleLogout = () => {
+    setUser(null);
+  };
 
   if (!user) {
     return <Login onLogin={handleLogin} />;
@@ -229,9 +212,6 @@ function Dashboard({ user, onLogout }) {
         <h1>⚔️ L4D Stats Portal</h1>
         <div className="header-right">
           <div className="user-info">
-            <span style={{ marginRight: 12, fontWeight: 500, color: '#2a7' }}>
-              Olá, {user.user_metadata?.full_name || user.email.split("@")[0]}
-            </span>
             <span>👤</span>
             <span className="user-email">{user.email}</span>
           </div>

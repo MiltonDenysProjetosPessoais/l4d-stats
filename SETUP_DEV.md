@@ -5,7 +5,7 @@
 ### 1. **Dados de Exemplo (Mock Data)**
 - ✓ 5 jogadores de teste
 - ✓ 13 votos pré-definidos
-- ✓ Dados distribuídos no arquivo `netlify/functions/players.mjs` e `vote.mjs`
+- ✓ Dados distribuídos no arquivo `api/players.js` e `api/vote.js`
 
 ### 2. **Modo Desenvolvimento Automático**
 - ✓ Ativação automática quando em desenvolvimento local
@@ -16,8 +16,8 @@
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `netlify/functions/players.mjs` | ✅ Modificado com mockPlayers |
-| `netlify/functions/vote.mjs` | ✅ Modificado com mockVotes |
+| `api/players.js` | ✅ Modificado com mockPlayers |
+| `api/vote.js` | ✅ Modificado com mockVotes |
 | `.env.development` | ✅ Variável DEV_MODE=true |
 | `DEV_MODE.md` | 📖 Documentação completa |
 | `VALIDATION_TESTS.js` | 🧪 Scripts de teste |
@@ -35,9 +35,9 @@ npm run dev
 ```
 Acesso: http://localhost:5173
 
-### **Opção 2: netlify dev (Com Netlify Functions)**
-```bash
-netlify dev
+### **Opção 2: vercel dev (Com API Routes)**
+
+vercel dev
 ```
 ou execute:
 ```bash
@@ -85,12 +85,12 @@ Você pode fazer login com qualquer email durante o desenvolvimento:
 
 ```javascript
 // Verificar jogadores carregados
-fetch("/.netlify/functions/players")
+fetch("/api/players")
   .then(r => r.json())
   .then(console.log)
 
 // Verificar votos carregados
-fetch("/.netlify/functions/vote")
+fetch("/api/vote")
   .then(r => r.json())
   .then(console.log)
 ```
@@ -108,7 +108,7 @@ Veja arquivo `VALIDATION_TESTS.js` para cálculos esperados detalhados
 
 ## 🔧 Como Adicionar Mais Dados
 
-Edit `netlify/functions/vote.mjs` (ou `players.mjs`):
+Edit `api/vote.js` (ou `api/players.js`):
 
 ```javascript
 const mockVotes = [
@@ -168,4 +168,3 @@ A detecção automática desativará o modo dev na Netlify e usará o banco de d
 ---
 
 **Tudo pronto! 🎉 Agora você tem dados de exemplo para testar localmente!**
-

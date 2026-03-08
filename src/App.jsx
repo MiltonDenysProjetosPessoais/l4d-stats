@@ -6,19 +6,12 @@ import "./App.css";
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
 export default function App() {
-  return (
   const [user, setUser] = useState(netlifyIdentity.currentUser());
 
   useEffect(() => {
     netlifyIdentity.init();
   }, []);
 
-  const handleLogin = useCallback((loggedInUser) => {
-    setUser(loggedInUser);
-  }, []);
-
-  const handleLogout = () => {
-    try {
   useEffect(() => {
     netlifyIdentity.on("logout", () => setUser(null));
     return () => {
@@ -26,14 +19,19 @@ export default function App() {
     };
   }, []);
 
-    }
-    return <Login onLogin={handleLogin} />;
+  const handleLogin = useCallback((loggedInUser) => {
+    setUser(loggedInUser);
+  }, []);
+
+  const handleLogout = () => {
+    netlifyIdentity.logout();
   };
 
+  if (!user) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return <Dashboard user={user} onLogout={handleLogout} />;
-    name: user.fullName || user.username || (user.primaryEmailAddress?.emailAddress?.split("@")[0] ?? "")
-  };
-  return <Dashboard user={userData} onLogout={() => window.location.reload()} />;
 }
 
 // calcula overall de um jogador a partir dos votos recebidos
@@ -86,7 +84,7 @@ function Dashboard({ user, onLogout }) {
         });
 
         // carregar jogadores e votos
-            name: user.user_metadata?.full_name || user.email.split("@")[0],
+        const [playersRes, votesRes] = await Promise.all([
           fetch("/api/players"),
           fetch("/api/vote"),
         ]);
@@ -113,7 +111,7 @@ function Dashboard({ user, onLogout }) {
   }, [user.email, user.name]);
 
   const loadData = async () => {
-  }, [user.email, user.user_metadata?.full_name]);
+    const [playersRes, votesRes] = await Promise.all([
       fetch("/api/players"),
       fetch("/api/vote"),
     ]);

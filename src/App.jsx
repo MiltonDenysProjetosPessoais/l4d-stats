@@ -16,6 +16,8 @@ function App() {
     nocao: 3,
   });
   const [loading, setLoading] = useState(true);
+  // Novo: cada visitante é identificado por um id único no navegador
+  const [visitorId, setVisitorId] = useState(null);
 
   useEffect(() => {
     // Simula carregamento dos dados mock
@@ -26,12 +28,24 @@ function App() {
     }, 500);
   }, []);
 
+  useEffect(() => {
+    let id = localStorage.getItem("visitorId");
+    if (!id) {
+      id = `visitor_${Math.random().toString(36).slice(2, 12)}`;
+      localStorage.setItem("visitorId", id);
+    }
+    setVisitorId(id);
+  }, []);
+
   const otherPlayers = players;
   const selectedPlayer = otherPlayers.find((p) => p.email === selectedEmail);
   const playerVotes = selectedPlayer
     ? votes.filter((v) => v.player === selectedPlayer.email)
     : [];
-  const votedEmails = new Set(votes.map((v) => v.player));
+  // Só mostra o selo se o visitante já votou naquele player
+  const votedEmails = new Set(
+    votes.filter((v) => v.voter === visitorId).map((v) => v.player)
+  );
 
   function getPlayerStats(playerEmail, allVotes) {
     const pVotes = allVotes.filter((v) => v.player === playerEmail);
@@ -65,11 +79,11 @@ function App() {
   }, [players, votes]);
 
   const addVote = () => {
-    if (!selectedPlayer) return;
+    if (!selectedPlayer || !visitorId) return;
     setVotes([
       ...votes,
       {
-        voter: "anon@example.com",
+        voter: visitorId,
         player: selectedPlayer.email,
         ...vote,
         createdAt: new Date().toISOString(),

@@ -1,37 +1,62 @@
 // Dados de exemplo para desenvolvimento local
 export const mockPlayers = [
   {
-    email: "john.doe@example.com",
-    name: "John Doe",
+    email: "milton@example.com",
+    name: "Milton",
     registeredAt: "2025-01-01T10:00:00Z",
   },
   {
-    email: "jane.smith@example.com",
-    name: "Jane Smith",
+    email: "paulo@example.com",
+    name: "Paulo",
     registeredAt: "2025-01-02T10:00:00Z",
   },
   {
-    email: "alex.johnson@example.com",
-    name: "Alex Johnson",
+    email: "fonseca@example.com",
+    name: "Fonseca",
     registeredAt: "2025-01-03T10:00:00Z",
   },
   {
-    email: "chris.wilson@example.com",
-    name: "Chris Wilson",
+    email: "guedes@example.com",
+    name: "Guedes",
     registeredAt: "2025-01-04T10:00:00Z",
   },
   {
-    email: "sam.brown@example.com",
-    name: "Sam Brown",
+    email: "palazzo@example.com",
+    name: "Palazzo",
     registeredAt: "2025-01-05T10:00:00Z",
+  },
+  {
+    email: "ray@example.com",
+    name: "Ray",
+    registeredAt: "2025-01-06T10:00:00Z",
+  },
+  {
+    email: "leonidas@example.com",
+    name: "Leonidas",
+    registeredAt: "2025-01-07T10:00:00Z",
+  },
+  {
+    email: "everson@example.com",
+    name: "Everson",
+    registeredAt: "2025-01-08T10:00:00Z",
+  },
+  {
+    email: "gustavo@example.com",
+    name: "Gustavo",
+    registeredAt: "2025-01-09T10:00:00Z",
+  },
+  {
+    email: "sato@example.com",
+    name: "Sato",
+    registeredAt: "2025-01-10T10:00:00Z",
   },
 ];
 
 export const mockVotes = [
-  // Votos para John Doe
+  // Votos para Milton
   {
-    voter: "jane.smith@example.com",
-    player: "john.doe@example.com",
+    voter: "paulo@example.com",
+    player: "milton@example.com",
     mira: 4,
     cover: 5,
     comunicacao: 4,
@@ -40,8 +65,8 @@ export const mockVotes = [
     createdAt: "2025-01-06T10:00:00Z",
   },
   {
-    voter: "alex.johnson@example.com",
-    player: "john.doe@example.com",
+    voter: "fonseca@example.com",
+    player: "milton@example.com",
     mira: 5,
     cover: 4,
     comunicacao: 5,
@@ -50,8 +75,8 @@ export const mockVotes = [
     createdAt: "2025-01-06T11:00:00Z",
   },
   {
-    voter: "chris.wilson@example.com",
-    player: "john.doe@example.com",
+    voter: "guedes@example.com",
+    player: "milton@example.com",
     mira: 4,
     cover: 4,
     comunicacao: 3,
@@ -60,10 +85,10 @@ export const mockVotes = [
     createdAt: "2025-01-06T12:00:00Z",
   },
 
-  // Votos para Jane Smith
+  // Votos para Paulo
   {
-    voter: "john.doe@example.com",
-    player: "jane.smith@example.com",
+    voter: "milton@example.com",
+    player: "paulo@example.com",
     mira: 3,
     cover: 4,
     comunicacao: 5,
@@ -72,8 +97,8 @@ export const mockVotes = [
     createdAt: "2025-01-07T10:00:00Z",
   },
   {
-    voter: "alex.johnson@example.com",
-    player: "jane.smith@example.com",
+    voter: "fonseca@example.com",
+    player: "paulo@example.com",
     mira: 4,
     cover: 3,
     comunicacao: 5,
@@ -82,8 +107,8 @@ export const mockVotes = [
     createdAt: "2025-01-07T11:00:00Z",
   },
   {
-    voter: "sam.brown@example.com",
-    player: "jane.smith@example.com",
+    voter: "everson@example.com",
+    player: "paulo@example.com",
     mira: 3,
     cover: 3,
     comunicacao: 4,
@@ -92,10 +117,10 @@ export const mockVotes = [
     createdAt: "2025-01-07T12:00:00Z",
   },
 
-  // Votos para Alex Johnson
+  // Votos para Fonseca
   {
-    voter: "john.doe@example.com",
-    player: "alex.johnson@example.com",
+    voter: "milton@example.com",
+    player: "fonseca@example.com",
     mira: 5,
     cover: 5,
     comunicacao: 4,
@@ -104,8 +129,8 @@ export const mockVotes = [
     createdAt: "2025-01-08T10:00:00Z",
   },
   {
-    voter: "jane.smith@example.com",
-    player: "alex.johnson@example.com",
+    voter: "paulo@example.com",
+    player: "fonseca@example.com",
     mira: 4,
     cover: 4,
     comunicacao: 3,
@@ -114,10 +139,10 @@ export const mockVotes = [
     createdAt: "2025-01-08T11:00:00Z",
   },
 
-  // Votos para Chris Wilson
+  // Votos para Guedes
   {
-    voter: "john.doe@example.com",
-    player: "chris.wilson@example.com",
+    voter: "milton@example.com",
+    player: "guedes@example.com",
     mira: 3,
     cover: 3,
     comunicacao: 3,
@@ -126,8 +151,8 @@ export const mockVotes = [
     createdAt: "2025-01-09T10:00:00Z",
   },
   {
-    voter: "jane.smith@example.com",
-    player: "chris.wilson@example.com",
+    voter: "paulo@example.com",
+    player: "guedes@example.com",
     mira: 2,
     cover: 3,
     comunicacao: 2,
@@ -136,8 +161,8 @@ export const mockVotes = [
     createdAt: "2025-01-09T11:00:00Z",
   },
   {
-    voter: "sam.brown@example.com",
-    player: "chris.wilson@example.com",
+    voter: "everson@example.com",
+    player: "guedes@example.com",
     mira: 3,
     cover: 4,
     comunicacao: 3,
@@ -146,10 +171,10 @@ export const mockVotes = [
     createdAt: "2025-01-09T12:00:00Z",
   },
 
-  // Votos para Sam Brown
+  // Votos para Palazzo
   {
-    voter: "john.doe@example.com",
-    player: "sam.brown@example.com",
+    voter: "milton@example.com",
+    player: "palazzo@example.com",
     mira: 2,
     cover: 2,
     comunicacao: 4,
@@ -158,8 +183,8 @@ export const mockVotes = [
     createdAt: "2025-01-10T10:00:00Z",
   },
   {
-    voter: "alex.johnson@example.com",
-    player: "sam.brown@example.com",
+    voter: "fonseca@example.com",
+    player: "palazzo@example.com",
     mira: 3,
     cover: 3,
     comunicacao: 4,
@@ -168,4 +193,3 @@ export const mockVotes = [
     createdAt: "2025-01-10T11:00:00Z",
   },
 ];
-

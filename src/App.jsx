@@ -203,6 +203,12 @@ function App() {
       <div className="header">
         <h1>⚔️ L4D Stats Portal</h1>
       </div>
+      {/* Boas-vindas */}
+      <div className="welcome-message" style={{textAlign: "center", margin: "10px 0", fontSize: "1.2rem", color: "#b6aaff"}}>
+        {visitorName && (
+          <>Bem-vindo, <b>{visitorName}</b>!</>
+        )}
+      </div>
 
       {/* Balanceamento de times */}
       <div className="balance-section">
@@ -402,8 +408,7 @@ function App() {
                       }}
                     >
                       {vote[stat]}/5
-                    </span>
-                  </div>
+                    </div>
                 ))}
               </div>
               <button className="btn-primary" onClick={addVote} disabled={alreadyVoted}>
@@ -457,13 +462,12 @@ function App() {
         <h3>Log de Votantes</h3>
         <table>
           <thead>
-            <tr><th>VisitorID</th><th>Nome</th><th>Jogador</th></tr>
+            <tr><th>Nome</th><th>Jogador</th></tr>
           </thead>
           <tbody>
             {votes.map((v, i) => (
               <tr key={i}>
-                <td>{v.voter}</td>
-                <td>{v.voterName || "-"}</td>
+                <td>{v.voterName || v.voter}</td>
                 <td>{players.find(p => p.email === v.player)?.name || v.player}</td>
               </tr>
             ))}

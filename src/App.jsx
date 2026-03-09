@@ -62,17 +62,10 @@ function App() {
   const [selectedForBalance, setSelectedForBalance] = useState([]);
 
   useEffect(() => {
-    fetch("/api/player")
-      .then((r) => r.json())
-      .then((data) => {
-        setPlayers(data);
-        setLoading(false);
-      });
-    fetch("/api/vote")
-      .then((r) => r.json())
-      .then((data) => {
-        setVotes(data);
-      });
+    // Para desenvolvimento de CSS, use dados mockados
+    setPlayers(mockPlayers);
+    setVotes([]); // Se quiser, pode adicionar votos mockados aqui
+    setLoading(false);
   }, []);
 
   // Pergunta o nome do visitante se não estiver salvo
@@ -353,7 +346,7 @@ function App() {
 
       {/* layout principal */}
       <div className="main-content">
-        {/* coluna esquerda - seleção de jogadores */}
+        {/* coluna esquerda - seleção de jogadores + estatísticas */}
         <div className="voting-section">
           {/* seleção de jogadores */}
           <div className="vote-card">
@@ -380,6 +373,44 @@ function App() {
               ))}
             </div>
           </div>
+
+          {/* estatísticas do jogador */}
+          {selectedPlayer && (
+            <div className="vote-card">
+              <h3>📊 Estatísticas de {selectedPlayer.name}</h3>
+              <div className="stats-display">
+                {STATS.map((stat) => {
+                  const value = calculateAverage(stat);
+                  const percentage = (value / 5) * 100;
+                  return (
+                    <div key={stat} className="stat-row">
+                      <span className="stat-name">{stat}</span>
+                      <div className="stat-value">
+                        <div className="stat-bar">
+                          <div
+                            className="stat-bar-fill"
+                            style={{ width: `${percentage}%` }}
+                          />
+                        </div>
+                        <span style={{ minWidth: "35px", textAlign: "right" }}>
+                          {value.toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="overall-display">
+                <h3>OVERALL</h3>
+                <div className="overall-value">{overall.toFixed(2)}</div>
+                <small style={{ color: "#999" }}>
+                  baseado em{" "}
+                  {playerVotes.length} voto{playerVotes.length !== 1 ? "s" : ""}
+                </small>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* coluna central - formulário de votação */}
@@ -419,44 +450,6 @@ function App() {
               <button className="btn-primary" onClick={addVote} disabled={alreadyVoted}>
                 {alreadyVoted ? "Você já votou" : "Enviar Voto"}
               </button>
-            </div>
-          )}
-
-          {/* estatísticas do jogador */}
-          {selectedPlayer && (
-            <div className="vote-card">
-              <h3>📊 Estatísticas de {selectedPlayer.name}</h3>
-              <div className="stats-display">
-                {STATS.map((stat) => {
-                  const value = calculateAverage(stat);
-                  const percentage = (value / 5) * 100;
-                  return (
-                    <div key={stat} className="stat-row">
-                      <span className="stat-name">{stat}</span>
-                      <div className="stat-value">
-                        <div className="stat-bar">
-                          <div
-                            className="stat-bar-fill"
-                            style={{ width: `${percentage}%` }}
-                          />
-                        </div>
-                        <span style={{ minWidth: "35px", textAlign: "right" }}>
-                          {value.toFixed(2)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="overall-display">
-                <h3>OVERALL</h3>
-                <div className="overall-value">{overall.toFixed(2)}</div>
-                <small style={{ color: "#999" }}>
-                  baseado em{" "}
-                  {playerVotes.length} voto{playerVotes.length !== 1 ? "s" : ""}
-                </small>
-              </div>
             </div>
           )}
         </div>

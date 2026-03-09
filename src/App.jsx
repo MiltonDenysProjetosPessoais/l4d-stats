@@ -468,7 +468,7 @@ function App() {
           <tbody>
             {votes.map((v, i) => (
               <tr key={i}>
-                <td>{v.voterName || v.voter}</td>
+                <td>{v.voter_name || v.voterName || v.voter}</td>
                 <td>{players.find(p => p.email === v.player)?.name || v.player}</td>
               </tr>
             ))}

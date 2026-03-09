@@ -6,6 +6,23 @@ const pool = new Pool({
 });
 
 export default async function handler(req, res) {
+  // GET - listar todos os jogadores
+  if (req.method === "GET") {
+    try {
+      const result = await pool.query("SELECT id, name, created_at FROM players ORDER BY name ASC");
+      // Adapta para o formato esperado pelo frontend (com campo 'email' igual ao 'name')
+      const players = result.rows.map(row => ({
+        email: row.name, // para compatibilidade com frontend
+        name: row.name,
+        registeredAt: row.created_at,
+        id: row.id,
+      }));
+      return res.status(200).json(players);
+    } catch (err) {
+      return res.status(500).json({ error: "Erro ao buscar jogadores", details: err.message });
+    }
+  }
+
   // POST - adicionar jogador
   if (req.method === "POST") {
     const { name } = req.body;
@@ -41,4 +58,3 @@ export default async function handler(req, res) {
 
   return res.status(405).json({ error: "Método não permitido" });
 }
-

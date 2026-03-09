@@ -62,12 +62,16 @@ function App() {
   const [selectedForBalance, setSelectedForBalance] = useState([]);
 
   useEffect(() => {
-    setPlayers(mockPlayers); // Garante que os nomes dos jogadores aparecem sempre
+    fetch("/api/player")
+      .then((r) => r.json())
+      .then((data) => {
+        setPlayers(data);
+        setLoading(false);
+      });
     fetch("/api/vote")
       .then((r) => r.json())
       .then((data) => {
         setVotes(data);
-        setLoading(false);
       });
   }, []);
 

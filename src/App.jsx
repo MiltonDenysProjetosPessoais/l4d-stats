@@ -408,7 +408,8 @@ function App() {
                       }}
                     >
                       {vote[stat]}/5
-                    </div>
+                    </span>
+                  </div>
                 ))}
               </div>
               <button className="btn-primary" onClick={addVote} disabled={alreadyVoted}>

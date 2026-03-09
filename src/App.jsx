@@ -482,16 +482,14 @@ function App() {
         <code style={{fontSize: '0.95rem'}}>POST /api/player</code><br />
         <span>Body JSON: {'{"name": "Nome do Jogador"}'}</span><br />
         <span>Exemplo curl:</span>
-        <pre style={{background: '#181838', color: '#b6aaff', padding: '8px', borderRadius: '6px', fontSize: '0.95rem'}}>
-curl -X POST https://SEUSITE/api/player -H "Content-Type: application/json" -d '{"name": "Novo Jogador"}'
+        <pre style={{background: '#181838', color: '#b6aaff', padding: '8px', borderRadius: '6px', fontSize: '0.95rem'}}>{`curl -X POST https://SEUSITE/api/player -H "Content-Type: application/json" -d '{"name": "Novo Jogador"}'`}
         </pre>
         <br />
         <b>API para deletar jogador:</b><br />
         <code style={{fontSize: '0.95rem'}}>DELETE /api/player</code><br />
         <span>Body JSON: {'{"name": "Nome do Jogador"}'}</span><br />
         <span>Exemplo curl:</span>
-        <pre style={{background: '#181838', color: '#b6aaff', padding: '8px', borderRadius: '6px', fontSize: '0.95rem'}}>
-curl -X DELETE https://SEUSITE/api/player -H "Content-Type: application/json" -d '{"name": "Nome do Jogador"}'
+        <pre style={{background: '#181838', color: '#b6aaff', padding: '8px', borderRadius: '6px', fontSize: '0.95rem'}}>{`curl -X DELETE https://SEUSITE/api/player -H "Content-Type: application/json" -d '{"name": "Nome do Jogador"}'`}
         </pre>
       </div>
     </div>

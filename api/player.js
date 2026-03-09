@@ -43,6 +43,21 @@ export default async function handler(req, res) {
     return res.status(200).json({ message: "Jogador adicionado!", player: { id, name: name.trim() } });
   }
 
+  // NOVO: DELETE /api/player?votesOf=nome - zera votos de um jogador
+  if (req.method === "DELETE" && req.query && req.query.votesOf) {
+    const playerName = req.query.votesOf;
+    if (!playerName || typeof playerName !== "string" || !playerName.trim()) {
+      return res.status(400).json({ error: "Nome do jogador é obrigatório para zerar votos." });
+    }
+    try {
+      // Remove todos os votos do jogador (como player)
+      const del = await pool.query("DELETE FROM votes WHERE player = $1", [playerName.trim()]);
+      return res.status(200).json({ message: `Votos do jogador '${playerName}' zerados!`, deleted: del.rowCount });
+    } catch (err) {
+      return res.status(500).json({ error: "Erro ao zerar votos do jogador", details: err.message });
+    }
+  }
+
   // DELETE - remover jogador por nome
   if (req.method === "DELETE") {
     const { name } = req.body;

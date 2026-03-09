@@ -6,7 +6,7 @@ const pool = new Pool({
 });
 
 export default async function handler(req, res) {
-  // POST - submit a vote (one vote per voter-votee pair)
+  // POST - submit a vote (cada voto é um registro novo)
   if (req.method === "POST") {
     const { voter, player, mira, cover, comunicacao, infectado, nocao } = req.body;
 
@@ -20,8 +20,7 @@ export default async function handler(req, res) {
 
     await pool.query(
       `INSERT INTO votes (voter, player, mira, cover, comunicacao, infectado, nocao, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-       ON CONFLICT (voter, player) DO UPDATE SET mira = $3, cover = $4, comunicacao = $5, infectado = $6, nocao = $7, created_at = NOW()`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
       [voter, player, mira, cover, comunicacao, infectado, nocao]
     );
 

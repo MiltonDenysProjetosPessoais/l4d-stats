@@ -4,6 +4,46 @@ import { mockPlayers } from "./mockData";
 
 const STATS = ["mira", "cover", "comunicacao", "infectado", "nocao"];
 
+function balanceTeams(selectedPlayers) {
+  // Ordena por overall decrescente
+  const sorted = [...selectedPlayers].sort((a, b) => b.overall - a.overall);
+  const teamA = [];
+  const teamB = [];
+  let sumA = 0;
+  let sumB = 0;
+
+  for (const p of sorted) {
+    if (teamA.length < teamB.length) {
+      teamA.push(p);
+      sumA += p.overall;
+    } else if (teamB.length < teamA.length) {
+      teamB.push(p);
+      sumB += p.overall;
+    } else {
+      // Decide pelo menor total
+      if (sumA <= sumB) {
+        teamA.push(p);
+        sumA += p.overall;
+      } else {
+        teamB.push(p);
+        sumB += p.overall;
+      }
+    }
+  }
+
+  // Reserva se ímpar
+  let reserva = null;
+  if (teamA.length > teamB.length) {
+    reserva = teamA.pop();
+    sumA -= reserva.overall;
+  } else if (teamB.length > teamA.length) {
+    reserva = teamB.pop();
+    sumB -= reserva.overall;
+  }
+
+  return { teamA, teamB, reserva, sumA, sumB };
+}
+
 function App() {
   const [players, setPlayers] = useState([]);
   const [votes, setVotes] = useState([]);
@@ -18,6 +58,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   // Novo: cada visitante é identificado por um id único no navegador
   const [visitorId, setVisitorId] = useState(null);
+  const [selectedForBalance, setSelectedForBalance] = useState([]);
 
   useEffect(() => {
     setPlayers(mockPlayers); // Garante que os nomes dos jogadores aparecem sempre
@@ -110,6 +151,21 @@ function App() {
     }
   };
 
+  // Calcula overall dos jogadores selecionados
+  const selectedPlayersWithOverall = useMemo(() => {
+    return players
+      .map((p) => {
+        const stats = getPlayerStats(p.email, votes);
+        return { ...p, overall: stats.overall };
+      })
+      .filter((p) => selectedForBalance.includes(p.email));
+  }, [players, votes, selectedForBalance]);
+
+  const balanced = useMemo(
+    () => balanceTeams(selectedPlayersWithOverall),
+    [selectedPlayersWithOverall]
+  );
+
   if (loading) {
     return (
       <div
@@ -132,6 +188,84 @@ function App() {
       {/* header */}
       <div className="header">
         <h1>⚔️ L4D Stats Portal</h1>
+      </div>
+
+      {/* Balanceamento de times */}
+      <div className="balance-section">
+        <h2>⚖️ Balanceamento de Times</h2>
+        <div className="balance-select">
+          <h3>Selecione jogadores para balancear:</h3>
+          <div className="players-grid">
+            {players.map((p) => (
+              <button
+                key={p.email}
+                className={`player-btn ${
+                  selectedForBalance.includes(p.email) ? "selected" : ""
+                }`}
+                onClick={() => {
+                  setSelectedForBalance((prev) =>
+                    prev.includes(p.email)
+                      ? prev.filter((e) => e !== p.email)
+                      : [...prev, p.email]
+                  );
+                }}
+              >
+                {p.name}
+              </button>
+            ))}
+          </div>
+        </div>
+        {/* Tabela de resultado */}
+        {selectedForBalance.length > 0 && (
+          <div className="balance-table">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Time</th>
+                  <th>Overall</th>
+                </tr>
+              </thead>
+              <tbody>
+                {balanced.teamA.map((p) => (
+                  <tr key={p.email}>
+                    <td>{p.name}</td>
+                    <td>Time A</td>
+                    <td>{p.overall.toFixed(2)}</td>
+                  </tr>
+                ))}
+                {balanced.teamB.map((p) => (
+                  <tr key={p.email}>
+                    <td>{p.name}</td>
+                    <td>Time B</td>
+                    <td>{p.overall.toFixed(2)}</td>
+                  </tr>
+                ))}
+                {balanced.reserva && (
+                  <tr key={balanced.reserva.email}>
+                    <td>{balanced.reserva.name}</td>
+                    <td>Reserva</td>
+                    <td>{balanced.reserva.overall.toFixed(2)}</td>
+                  </tr>
+                )}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={2}>Soma total do Overall do Time A</td>
+                  <td>{balanced.sumA.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={2}>Soma total do Overall do Time B</td>
+                  <td>{balanced.sumB.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={2}>Diferença final entre os times</td>
+                  <td>{Math.abs(balanced.sumA - balanced.sumB).toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* NOVO: ranking acima dos nomes */}
@@ -157,18 +291,32 @@ function App() {
                 medalEmoji = "🥉";
               }
               return (
-                <div key={p.email} className={`ranking-item ${medalClass}` } style={{minWidth: 180}}>
+                <div
+                  key={p.email}
+                  className={`ranking-item ${medalClass}`}
+                  style={{ minWidth: 180 }}
+                >
                   <div className="ranking-position">{medalEmoji}</div>
                   <div className="ranking-info">
                     <div className="ranking-name">
                       #{index + 1} {p.name}
                     </div>
                     <div className="ranking-stats">
-                      <span>Mira - {p.averages.mira?.toFixed(2) ?? "-"}</span>
-                      <span>Cover - {p.averages.cover?.toFixed(2) ?? "-"}</span>
-                      <span>Comunicacao - {p.averages.comunicacao?.toFixed(2) ?? "-"}</span>
-                      <span>Infectado - {p.averages.infectado?.toFixed(2) ?? "-"}</span>
-                      <span>Nocao - {p.averages.nocao?.toFixed(2) ?? "-"}</span>
+                      <span>
+                        Mira - {p.averages.mira?.toFixed(2) ?? "-"}
+                      </span>
+                      <span>
+                        Cover - {p.averages.cover?.toFixed(2) ?? "-"}
+                      </span>
+                      <span>
+                        Comunicacao - {p.averages.comunicacao?.toFixed(2) ?? "-"}
+                      </span>
+                      <span>
+                        Infectado - {p.averages.infectado?.toFixed(2) ?? "-"}
+                      </span>
+                      <span>
+                        Nocao - {p.averages.nocao?.toFixed(2) ?? "-"}
+                      </span>
                     </div>
                   </div>
                   <div className="ranking-score">{p.overall.toFixed(1)}</div>

@@ -58,6 +58,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   // Novo: cada visitante é identificado por um id único no navegador
   const [visitorId, setVisitorId] = useState(null);
+  const [visitorName, setVisitorName] = useState("");
   const [selectedForBalance, setSelectedForBalance] = useState([]);
 
   useEffect(() => {
@@ -70,6 +71,7 @@ function App() {
       });
   }, []);
 
+  // Pergunta o nome do visitante se não estiver salvo
   useEffect(() => {
     let id = localStorage.getItem("visitorId");
     if (!id) {
@@ -77,6 +79,12 @@ function App() {
       localStorage.setItem("visitorId", id);
     }
     setVisitorId(id);
+    let name = localStorage.getItem("visitorName") || "";
+    if (!name) {
+      name = prompt("Qual seu nome? (será exibido no log de votos)") || "Anônimo";
+      localStorage.setItem("visitorName", name);
+    }
+    setVisitorName(name);
   }, []);
 
   const otherPlayers = players;
@@ -120,10 +128,16 @@ function App() {
       .sort((a, b) => b.overall - a.overall);
   }, [players, votes]);
 
+  // Só permite votar se ainda não votou nesse jogador
+  const alreadyVoted = selectedPlayer && votes.some(
+    (v) => v.voter === visitorId && v.player === selectedPlayer.email
+  );
+
   const addVote = async () => {
-    if (!selectedPlayer || !visitorId) return;
+    if (!selectedPlayer || !visitorId || alreadyVoted) return;
     const voteData = {
       voter: visitorId,
+      voterName: visitorName,
       player: selectedPlayer.email,
       ...vote,
       createdAt: new Date().toISOString(),
@@ -392,8 +406,8 @@ function App() {
                   </div>
                 ))}
               </div>
-              <button className="btn-primary" onClick={addVote}>
-                Enviar Voto
+              <button className="btn-primary" onClick={addVote} disabled={alreadyVoted}>
+                {alreadyVoted ? "Você já votou" : "Enviar Voto"}
               </button>
             </div>
           )}
@@ -436,6 +450,25 @@ function App() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Log de quem já votou (admin ou todos) */}
+      <div className="vote-log">
+        <h3>Log de Votantes</h3>
+        <table>
+          <thead>
+            <tr><th>VisitorID</th><th>Nome</th><th>Jogador</th></tr>
+          </thead>
+          <tbody>
+            {votes.map((v, i) => (
+              <tr key={i}>
+                <td>{v.voter}</td>
+                <td>{v.voterName || "-"}</td>
+                <td>{players.find(p => p.email === v.player)?.name || v.player}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

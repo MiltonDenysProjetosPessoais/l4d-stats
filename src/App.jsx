@@ -347,7 +347,7 @@ function App() {
       {/* layout principal */}
       <div className="main-content">
         {/* coluna esquerda - seleção de jogadores + estatísticas */}
-        <div className="voting-section">
+        <div className="left-panel">
           {/* seleção de jogadores */}
           <div className="vote-card">
             <h3>👥 Selecione um Jogador</h3>
@@ -414,7 +414,7 @@ function App() {
         </div>
 
         {/* coluna direita - formulário de votação */}
-        <div className="voting-section">
+        <div className="right-panel">
           {/* formulário de votação */}
           {selectedPlayer && (
             <div className="vote-card">

@@ -67,7 +67,7 @@
 }
 
 /* ==================== PAINEL ESQUERDO ==================== */
-.voting-section {
+.left-panel {
   display: flex;
   flex-direction: column;
   gap: 15px;
@@ -75,66 +75,48 @@
   padding-right: 5px;
 }
 
-.voting-section::-webkit-scrollbar {
+.left-panel::-webkit-scrollbar {
   width: 6px;
 }
 
-.voting-section::-webkit-scrollbar-track {
+.left-panel::-webkit-scrollbar-track {
   background: rgba(102, 126, 234, 0.1);
   border-radius: 3px;
 }
 
-.voting-section::-webkit-scrollbar-thumb {
+.left-panel::-webkit-scrollbar-thumb {
   background: rgba(102, 126, 234, 0.3);
   border-radius: 3px;
 }
 
-.voting-section::-webkit-scrollbar-thumb:hover {
+.left-panel::-webkit-scrollbar-thumb:hover {
   background: rgba(102, 126, 234, 0.5);
 }
 
-.players-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 8px;
-  margin-bottom: 10px;
+.right-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  overflow-y: auto;
+  padding-right: 5px;
 }
 
-.player-btn {
-  padding: 10px 14px;
-  border: 2px solid rgba(102, 126, 234, 0.3);
-  background: rgba(102, 126, 234, 0.05);
-  color: #eee;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 500;
-  font-size: 0.9rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.right-panel::-webkit-scrollbar {
+  width: 6px;
 }
 
-.player-btn:hover {
-  background: rgba(102, 126, 234, 0.15);
-  border-color: rgba(102, 126, 234, 0.6);
-  transform: translateY(-2px);
-}
-
-.player-btn.selected {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: #667eea;
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
-}
-
-.player-badge {
-  display: inline-block;
-  margin-left: 4px;
-  padding: 2px 4px;
-  background: rgba(40, 167, 69, 0.3);
-  color: #28a745;
-  font-size: 0.7rem;
+.right-panel::-webkit-scrollbar-track {
+  background: rgba(102, 126, 234, 0.1);
   border-radius: 3px;
+}
+
+.right-panel::-webkit-scrollbar-thumb {
+  background: rgba(102, 126, 234, 0.3);
+  border-radius: 3px;
+}
+
+.right-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(102, 126, 234, 0.5);
 }
 
 /* ==================== CARD VOTAÇÃO ==================== */
@@ -431,7 +413,7 @@ button {
     order: -1;
   }
 
-  .voting-section {
+  .left-panel {
     order: 0;
   }
 
@@ -487,7 +469,7 @@ button {
     gap: 12px;
   }
 
-  .voting-section {
+  .left-panel {
     gap: 12px;
   }
 
@@ -639,7 +621,7 @@ button {
     gap: 10px;
   }
 
-  .voting-section {
+  .left-panel {
     gap: 10px;
   }
 

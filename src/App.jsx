@@ -82,6 +82,13 @@ function App() {
       .catch(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    fetch("/api/vote")
+      .then((r) => r.json())
+      .then((data) => setVotes(Array.isArray(data) ? data : []))
+      .catch(() => setVotes([]));
+  }, []);
+
   // Pergunta o nome do visitante se não estiver salvo
   useEffect(() => {
     let id = localStorage.getItem("visitorId");

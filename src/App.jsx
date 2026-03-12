@@ -413,7 +413,7 @@ function App() {
           )}
         </div>
 
-        {/* coluna central - formulário de votação */}
+        {/* coluna direita - formulário de votação */}
         <div className="voting-section">
           {/* formulário de votação */}
           {selectedPlayer && (

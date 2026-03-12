@@ -47,7 +47,7 @@ function balanceTeams(selectedPlayers) {
 function App() {
   const [players, setPlayers] = useState([]);
   const [votes, setVotes] = useState([]);
-  const [selectedEmail, setSelectedEmail] = useState(null);
+  const [selectedName, setSelectedName] = useState(null);
   const [vote, setVote] = useState({
     mira: 3,
     cover: 3,
@@ -62,10 +62,24 @@ function App() {
   const [selectedForBalance, setSelectedForBalance] = useState([]);
 
   useEffect(() => {
-    // Para desenvolvimento de CSS, use dados mockados
-    setPlayers(mockPlayers);
-    setVotes([]); // Se quiser, pode adicionar votos mockados aqui
-    setLoading(false);
+    // Busca jogadores reais do backend (agora em /api/player)
+    fetch("/api/player")
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          const players = data
+            .map((p) => ({
+              name: p.name || p.id || "",
+              ...p,
+            }))
+            .filter((p) => p.name);
+          setPlayers(players);
+        } else {
+          setPlayers([]);
+        }
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   // Pergunta o nome do visitante se não estiver salvo
@@ -85,17 +99,17 @@ function App() {
   }, []);
 
   const otherPlayers = players;
-  const selectedPlayer = otherPlayers.find((p) => p.email === selectedEmail);
+  const selectedPlayer = otherPlayers.find((p) => p.name === selectedName);
   const playerVotes = selectedPlayer
-    ? votes.filter((v) => v.player === selectedPlayer.email)
+    ? votes.filter((v) => v.player === selectedPlayer.name)
     : [];
   // Só mostra o selo se o visitante já votou naquele player
-  const votedEmails = new Set(
+  const votedNames = new Set(
     votes.filter((v) => v.voter === visitorId).map((v) => v.player)
   );
 
-  function getPlayerStats(playerEmail, allVotes) {
-    const pVotes = allVotes.filter((v) => v.player === playerEmail);
+  function getPlayerStats(playerName, allVotes) {
+    const pVotes = allVotes.filter((v) => v.player === playerName);
     if (pVotes.length === 0) {
       return { votesCount: 0, averages: {}, overall: 0 };
     }
@@ -110,7 +124,7 @@ function App() {
   }
 
   const selectedPlayerStats = selectedPlayer
-    ? getPlayerStats(selectedPlayer.email, votes)
+    ? getPlayerStats(selectedPlayer.name, votes)
     : { votesCount: 0, averages: {}, overall: 0 };
   const calculateAverage = (stat) => selectedPlayerStats.averages[stat] || 0;
   const overall = selectedPlayerStats.overall;
@@ -118,7 +132,7 @@ function App() {
   const ranking = useMemo(() => {
     return players
       .map((p) => {
-        const stats = getPlayerStats(p.email, votes);
+        const stats = getPlayerStats(p.name, votes);
         return { ...p, ...stats };
       })
       .filter((p) => p.votesCount > 0)
@@ -127,7 +141,7 @@ function App() {
 
   // Só permite votar se ainda não votou nesse jogador
   const alreadyVoted = selectedPlayer && votes.some(
-    (v) => v.voter === visitorId && v.player === selectedPlayer.email
+    (v) => v.voter === visitorId && v.player === selectedPlayer.name
   );
 
   const addVote = async () => {
@@ -135,7 +149,7 @@ function App() {
     const voteData = {
       voter: visitorId,
       voterName: visitorName,
-      player: selectedPlayer.email,
+      player: selectedPlayer.name,
       ...vote,
       createdAt: new Date().toISOString(),
     };
@@ -166,10 +180,10 @@ function App() {
   const selectedPlayersWithOverall = useMemo(() => {
     return players
       .map((p) => {
-        const stats = getPlayerStats(p.email, votes);
+        const stats = getPlayerStats(p.name, votes);
         return { ...p, overall: stats.overall };
       })
-      .filter((p) => selectedForBalance.includes(p.email));
+      .filter((p) => selectedForBalance.includes(p.name));
   }, [players, votes, selectedForBalance]);
 
   const balanced = useMemo(
@@ -207,6 +221,13 @@ function App() {
         )}
       </div>
 
+      {/* AVISO SE NÃO HÁ JOGADORES */}
+      {players.length === 0 && (
+        <div style={{ color: '#ffb300', textAlign: 'center', margin: '20px 0', fontWeight: 'bold', fontSize: '1.1rem' }}>
+          Nenhum jogador cadastrado no sistema. Cadastre pelo menos um jogador para começar!
+        </div>
+      )}
+
       {/* Balanceamento de times */}
       <div className="balance-section">
         <h2>⚖️ Balanceamento de Times</h2>
@@ -215,15 +236,15 @@ function App() {
           <div className="players-grid">
             {players.map((p) => (
               <button
-                key={p.email}
+                key={p.name}
                 className={`player-btn ${
-                  selectedForBalance.includes(p.email) ? "selected" : ""
+                  selectedForBalance.includes(p.name) ? "selected" : ""
                 }`}
                 onClick={() => {
                   setSelectedForBalance((prev) =>
-                    prev.includes(p.email)
-                      ? prev.filter((e) => e !== p.email)
-                      : [...prev, p.email]
+                    prev.includes(p.name)
+                      ? prev.filter((e) => e !== p.name)
+                      : [...prev, p.name]
                   );
                 }}
               >
@@ -245,21 +266,21 @@ function App() {
               </thead>
               <tbody>
                 {balanced.teamA.map((p) => (
-                  <tr key={p.email}>
+                  <tr key={p.name}>
                     <td>{p.name}</td>
                     <td>Time A</td>
                     <td>{p.overall.toFixed(2)}</td>
                   </tr>
                 ))}
                 {balanced.teamB.map((p) => (
-                  <tr key={p.email}>
+                  <tr key={p.name}>
                     <td>{p.name}</td>
                     <td>Time B</td>
                     <td>{p.overall.toFixed(2)}</td>
                   </tr>
                 ))}
                 {balanced.reserva && (
-                  <tr key={balanced.reserva.email}>
+                  <tr key={balanced.reserva.name}>
                     <td>{balanced.reserva.name}</td>
                     <td>Reserva</td>
                     <td>{balanced.reserva.overall.toFixed(2)}</td>
@@ -309,7 +330,7 @@ function App() {
               }
               return (
                 <div
-                  key={p.email}
+                  key={p.name}
                   className={`ranking-item ${medalClass}`}
                   style={{ minWidth: 180 }}
                 >
@@ -347,7 +368,7 @@ function App() {
       {/* layout principal */}
       <div className="main-content">
         {/* coluna esquerda - seleção de jogadores + estatísticas */}
-        <div className="voting-section">
+        <div className="left-panel">
           {/* seleção de jogadores */}
           <div className="vote-card">
             <h3>👥 Selecione um Jogador</h3>
@@ -359,14 +380,14 @@ function App() {
             <div className="players-grid">
               {otherPlayers.map((p) => (
                 <button
-                  key={p.email}
-                  onClick={() => setSelectedEmail(p.email)}
+                  key={p.name}
+                  onClick={() => setSelectedName(p.name)}
                   className={`player-btn ${
-                    selectedEmail === p.email ? "selected" : ""
+                    selectedName === p.name ? "selected" : ""
                   }`}
                 >
                   {p.name}
-                  {votedEmails.has(p.email) && (
+                  {votedNames.has(p.name) && (
                     <span className="player-badge">✓ votado</span>
                   )}
                 </button>
@@ -413,8 +434,8 @@ function App() {
           )}
         </div>
 
-        {/* coluna central - formulário de votação */}
-        <div className="voting-section">
+        {/* coluna direita - formulário de votação */}
+        <div className="right-panel">
           {/* formulário de votação */}
           {selectedPlayer && (
             <div className="vote-card">
@@ -458,19 +479,17 @@ function App() {
       {/* Log de quem já votou (admin ou todos) */}
       <div className="vote-log">
         <h3>Log de Votantes</h3>
-        <table>
-          <thead>
-            <tr><th>Nome</th><th>Jogador</th></tr>
-          </thead>
-          <tbody>
-            {votes.map((v, i) => (
-              <tr key={i}>
-                <td>{v.voter_name || v.voterName || v.voter}</td>
-                <td>{players.find(p => p.email === v.player)?.name || v.player}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {votes.map((v, i) => {
+            const voterName = v.voter_name || v.voterName || v.voter;
+            const playerName = players.find(p => p.name === v.player)?.name || v.player;
+            return (
+              <li key={i} style={{ marginBottom: 4 }}>
+                <span style={{ color: "#b6aaff" }}><b>{voterName}</b></span> votou em <span style={{ color: "#ffd700" }}><b>{playerName}</b></span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );

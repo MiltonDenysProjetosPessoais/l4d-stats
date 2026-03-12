@@ -458,19 +458,17 @@ function App() {
       {/* Log de quem já votou (admin ou todos) */}
       <div className="vote-log">
         <h3>Log de Votantes</h3>
-        <table>
-          <thead>
-            <tr><th>Nome</th><th>Jogador</th></tr>
-          </thead>
-          <tbody>
-            {votes.map((v, i) => (
-              <tr key={i}>
-                <td>{v.voter_name || v.voterName || v.voter}</td>
-                <td>{players.find(p => p.email === v.player)?.name || v.player}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ul style={{ listStyle: "none", padding: 0 }}>
+          {votes.map((v, i) => {
+            const voterName = v.voter_name || v.voterName || v.voter;
+            const playerName = players.find(p => p.email === v.player)?.name || v.player;
+            return (
+              <li key={i} style={{ marginBottom: 4 }}>
+                <span style={{ color: "#b6aaff" }}><b>{voterName}</b></span> votou em <span style={{ color: "#ffd700" }}><b>{playerName}</b></span>
+              </li>
+            );
+          })}
+        </ul>
       </div>
     </div>
   );

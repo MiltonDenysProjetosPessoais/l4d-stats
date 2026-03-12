@@ -62,10 +62,14 @@ function App() {
   const [selectedForBalance, setSelectedForBalance] = useState([]);
 
   useEffect(() => {
-    // Para desenvolvimento de CSS, use dados mockados
-    setPlayers(mockPlayers);
-    setVotes([]); // Se quiser, pode adicionar votos mockados aqui
-    setLoading(false);
+    // Busca jogadores reais do backend
+    fetch("/api/players")
+      .then((r) => r.json())
+      .then((data) => {
+        setPlayers(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
   // Pergunta o nome do visitante se não estiver salvo

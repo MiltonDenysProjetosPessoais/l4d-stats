@@ -223,7 +223,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 10px 0;
-  border-bottom: 1px solid rgba(300, 300, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .stat-row:last-child {
@@ -499,13 +499,10 @@ button {
     font-size: 1.1rem;
   }
 
-.vote-card h3 {
-  color: #aaa;
-  margin: 15px 0 12px 0;
-  font-size: 0.95rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
+  .vote-card h3 {
+    font-size: 0.85rem;
+    margin: 12px 0 10px 0;
+  }
 
   .players-grid {
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));

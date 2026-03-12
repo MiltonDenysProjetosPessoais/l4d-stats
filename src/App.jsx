@@ -62,11 +62,10 @@ function App() {
   const [selectedForBalance, setSelectedForBalance] = useState([]);
 
   useEffect(() => {
-    // Busca jogadores reais do backend
-    fetch("/api/players")
+    // Busca jogadores reais do backend (agora em /api/player)
+    fetch("/api/player")
       .then((r) => r.json())
       .then((data) => {
-        // Garante que cada jogador tem os campos 'email' e 'name'
         if (Array.isArray(data)) {
           const players = data
             .map((p) => ({

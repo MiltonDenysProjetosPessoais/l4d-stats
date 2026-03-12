@@ -222,6 +222,13 @@ function App() {
         )}
       </div>
 
+      {/* AVISO SE NÃO HÁ JOGADORES */}
+      {players.length === 0 && (
+        <div style={{ color: '#ffb300', textAlign: 'center', margin: '20px 0', fontWeight: 'bold', fontSize: '1.1rem' }}>
+          Nenhum jogador cadastrado no sistema. Cadastre pelo menos um jogador para começar!
+        </div>
+      )}
+
       {/* Balanceamento de times */}
       <div className="balance-section">
         <h2>⚖️ Balanceamento de Times</h2>
